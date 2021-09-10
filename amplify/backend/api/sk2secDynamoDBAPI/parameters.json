@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "sk2secDynamoDBAPI",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authsk2sec91b34d93",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "projectName": "sk2sec",
+  "version": "3.1",
+  "frontend": "javascript",
+  "javascript": {
+    "framework": "none",
+    "config": {
+      "SourceDir": "src",
+      "DistributionDir": "dist",
+      "BuildCommand": "yarn generate",
+      "StartCommand": "npm run-script start"
+    }
+  },
+  "providers": [
+    "awscloudformation"
+  ]
+}

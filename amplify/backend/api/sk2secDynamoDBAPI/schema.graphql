@@ -1,0 +1,40 @@
+type QuestionsMaster 
+@model
+@key(fields: ["question_id"])
+@key(name: "SortedQuestinsMaster" fields: ["dummy", "createdAt"] queryField: "listSortedQuestinsMaster")
+{
+  question_id: ID!
+  title: String!
+  participants: Int
+  taken: Int
+  questions: [QuestionsSubMaster] @connection(keyName: "questionsSubMasterIndex", fields:["question_id"], sortField: "question_sub_id")
+  dummy: String!
+  createdAt: AWSDateTime!
+}
+
+type QuestionsSubMaster 
+@model
+@key(fields: ["question_id", "question_sub_id"])
+@key(name: "questionsSubMasterIndex", fields: ["question_id"], queryField: "listSortedQuestionsSubMaster")
+{
+  question_id: ID!
+  question_sub_id: Int!
+  question: String!
+  ans: [String]!
+  correct: Int!
+  comment: String
+  questionmaster: QuestionsMaster @connection(fields: ["question_id"], sortField: "question_sub_id")
+}
+
+type UserResult
+@model
+@key(fields: ["user_id", "question_id"])
+@key(name: "question_idIndex", fields: ["question_id"], queryField: "question_idIndexKey")
+{
+  user_id: ID!
+  question_id: ID!
+  name: String
+  status: String
+  answers: [Int]
+  correct_answers: Int
+}
