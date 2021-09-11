@@ -15,14 +15,16 @@
           <thead>
             <tr>
               <th>タイトル</th>
-              <th>削除</th>
+              <th class="text-center" style="font-size: 8pt;white-space: nowrap;">登録日</th>
+              <th class="text-center" style="font-size: 8pt;white-space: nowrap;">削除</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in questions"
               :key="item.question_id">
               <td><nuxt-link :to="`/admin/questions_management/details?question_id=${item.question_id}`">{{item.title}}</nuxt-link></td>
-              <td><v-icon @click.stop="goto(`/admin/questions_management/delete?question_id=${item.question_id}`)">mdi-delete</v-icon></td>
+              <td class="text-center" style="font-size: 8pt;white-space: nowrap;">{{item.createdAt.substr(0,10)}}</td>
+              <td class="text-center"><v-icon @click.stop="goto(`/admin/questions_management/delete?question_id=${item.question_id}`)">mdi-delete</v-icon></td>
             </tr>
           </tbody>
         </template>

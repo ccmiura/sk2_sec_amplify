@@ -27,6 +27,15 @@
             required
           ></v-text-field>
         </v-row>
+        <v-row>
+          <v-text-field
+            v-model="user_id"
+            :rules="userIdRules"
+            label="ユーザーID"
+            :count=255
+            hint="未入力の場合メールアドレスのユーザー名を自動で設定します。"
+          ></v-text-field>
+        </v-row>
       </v-form>
     </v-col>
   </v-row>
@@ -67,6 +76,25 @@
   <v-overlay :value="progress">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
   </v-overlay>
+  <v-dialog
+    v-model="success"
+    width="500"
+  >
+    <v-card>
+      <v-card-title class="text-h5 grey lighten-2">
+        ユーザーを追加しました。
+      </v-card-title>
+      <v-divider></v-divider>
+      <v-card-actions class="pa-4">
+        <v-row justify="center">
+        <v-btn 
+          color="primary"
+          text
+          @click.stop="clear">OK</v-btn>
+        </v-row>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   </v-container>
 </template>
 <script>
@@ -78,6 +106,7 @@ export default {
     progress: false,
     email: "",
     userName: "",
+    user_id: "",
     addUserPassword: "",
     confirmPassword: "",
     emailRules:[
@@ -85,7 +114,11 @@ export default {
       v => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(v) || 'emailの書式が正しくありません。'
     ],
     userNameRules: [v => !!v || '名前は必須です。'],
-    show: false
+    userIdRules:[
+      v => /^[a-zA-Z0-9_.+-]*/.test(v) || 'ユーザー名に使用できるのは半角英数と記号のみです。'
+    ],
+    show: false,
+    success: false,
   }),
   mounted(){
     console.log("/admin/user_management/add mounted")
@@ -100,17 +133,28 @@ export default {
   },
   methods:{
     async addUser(){
-      console.log(this.email, this.userName, this.addUserPassword, this.confirmPassword, this.valid)
+      console.log(this.email, this.userName, this.user_id, this.addUserPassword, this.confirmPassword, this.valid)
+      if(this.user_id === ""){
+        this.user_id = this.email.split('@')[0]
+      }
       try{
         this.dialog = false
         this.progress = true
-        const result = await this.$authUtilitys.addUser(this.email, this.userName)
+        const result = await this.$authUtilitys.addUser(this.email, this.user_id, this.userName)
         console.log(result)
         this.progress = false
+        this.success = true
       }catch(err){
         console.log(err)
         this.progress = false
       }
+    },
+    clear(){
+      this.email = ""
+      this.userName = ""
+      this.user_id = ""
+      this.valid = false
+      this.success = false
     }
   }
 }

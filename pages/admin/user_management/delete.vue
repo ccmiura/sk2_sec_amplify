@@ -98,6 +98,11 @@ export default ({
       try{
         this.dialog = false
         this.progress = true
+        const listUserResult = await this.$userResultUtilitys.getListUserResult(this.user.username)
+        console.log(listUserResult)
+        listUserResult.forEach(async e=> {
+          await this.$userResultUtilitys.delUserResult(e.user_id, e.question_id)
+        })
         const res = await this.$authUtilitys.deleteUser(this.user.username)
         console.log(res)
         this.progress = false

@@ -38,13 +38,13 @@ async function listUsersInGroup(group, nextToken=undefined, limit=60){
   return rest
 }
 
-async function addUser(email, name){
+async function addUser(email, user_id, name){
   let apiName = 'AdminQueries';
-  let username = email.split('@')[0]
+  
 
   let myInit1 = { 
       body: {
-        username: username,
+        username: user_id,
         userAttributes: [
           {Name: "name", Value: name},
           {Name: "email", Value: email},
@@ -58,7 +58,7 @@ async function addUser(email, name){
   }
   let myInit2 = { 
     body: {
-      username: username,
+      username: user_id,
       groupname: "user",
     },
     headers: {
