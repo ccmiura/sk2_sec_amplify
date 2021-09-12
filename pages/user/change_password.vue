@@ -18,23 +18,12 @@
           class="text-caption "
           width="100%"
         >
-          パスワードの制限
-          <ul>
-            <li>使用できる文字の種類</li>
-            <ul>
-              <li>アルファベットの大文字と小文字</li>
-              <li>数字</li>
-              <li>ピリオド(.)、スラッシュ(/)、クエスチョンマーク(?)、ハイフン(-)、シャープ(#)</li>
-            </ul>
-            <li>文字数</li>
-              <ul><li>8文字以上24文字以下</li></ul>
-
-            <li>パスワードの制限</li>
-              <ul>
-                <li>大文字のアルファベットを少なくとも一つ含む</li>
-                <li>記号を少なくとも一つ含む</li>
-              </ul>
-          </ul>
+          パスワードの条件
+          <ol>
+            <li>パスワードの文字数制限: 8～128 文字</li>
+            <li>大文字、小文字、数字、! @ # $ % ^ & * ( ) _ + - = [ ] { } | ' 記号のうち、最低 3つの文字タイプの組み合わせ</li>
+            <li>AWSアカウント名またはEメールアドレスと同じでないこと</li>
+          </ol>
         </v-alert>
     </v-col>
   </v-row>
@@ -44,25 +33,29 @@
           <v-row>
             <v-text-field
               v-model="oldPassword"
-              :rules="oldPasswordRules"
+              :rules="[rules.required]"
               label="古いパスワード"
-              counter=24
+              counter=true
               required
               full-width
               dense
               class="pl-3 pr-3"
+              type="password"
             ></v-text-field>
           </v-row>
           <v-row>
             <v-text-field
               v-model="newPassword"
-              :rules="newPasswordRules"
+              :rules="[rules.required, rules.minLength, rules.stringKind, 
+              (newPassword != oldPassword) || '古いパスワードと同じパスワードは使用できません。',
+              (userInfo.email != newPassword) || 'emailと同じパスワードは使用できません。']"
               label="新しいパスワード"
-              counter=24
+              counter=true
               required
               full-width
               dense
               class="pl-3 pr-3"
+              type="password"
             ></v-text-field>
           </v-row>
           <v-row>
@@ -70,11 +63,12 @@
               v-model="confirmPassword"
               :rules="[(newPassword === confirmPassword) || 'パスワードが一致しません。']"
               label="パスワード再入力"
-              counter=24
+              counter=true
               required
               full-width
               dense
               class="pl-3 pr-3 mb-3"
+              type="password"
             ></v-text-field>
           </v-row>
         </v-form>
@@ -141,6 +135,11 @@
 </template>
 <script>
 import { Auth } from 'aws-amplify'
+import { mapGetters  } from "vuex";
+const symbol = "!@#$%^&*()_+\\-=\\]\\[\\{\\}\\|\\.'";
+const regex = new RegExp(
+ `^((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])|(?=.*[a-z])(?=.*[A-Z])(?=.*[${symbol}])|(?=.*[A-Z])(?=.*[0-9])(?=.*[${symbol}])|(?=.*[a-z])(?=.*[0-9])(?=.*[${symbol}]))[a-zA-Z0-9${symbol}]{8,128}$`);
+
 export default {
   data: () => ({
     alert: false,
@@ -153,14 +152,21 @@ export default {
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
-    oldPasswordRules: [
-      v => !!v || 'パスワードは必須です。'
-    ],
-    newPasswordRules: [
-      v => !!v || 'パスワードは必須です。',
-      v => /^(?=.*[A-Z])(?=.*[.?/#-])[a-zA-Z0-9.?/#-]{8,24}$/.test(v) || 'パスワードの形式が正しくありません。'
-    ]
+    rules: {
+      required: v => !!v || 'パスワードは必須です。',
+      minLength: v => v.length >= 8 || 'パスワードは8文字以上です',
+      stringKind: v => regex.test(v) || 'パスワードの形式が正しくありません。',
+    }
   }),
+  
+  computed: {
+    ...mapGetters ({
+      userInfo: "userInfo/userInfo"
+    }),
+  },
+  mounted(){
+    console.log(this.userInfo)
+  },
   methods:{
     async changePassword(){
       this.dialog = false

@@ -14,7 +14,7 @@ const title_map = {
   "/user": "ユーザーポータル",
   "/user/answer": "問題回答",
   "/user/result": "結果＆解説",
-  "/user/password": "パスワード変更",
+  "/user/change_password": "パスワード変更",
 }
 export default ({route, store}) => {
   console.log("middleware title", route.path)

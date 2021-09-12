@@ -53,11 +53,12 @@ export default {
         // groupsは配列で取得される
         const groups = decoded['cognito:groups']
         
-
+        //console.log("hoge", authData, groups)
 
         const userInfo = {
           username: authData.username,
-          name: "name" in authData.attributes ? authData.attributes.name : undefined
+          name: "name" in authData.attributes ? authData.attributes.name : undefined,
+          email: authData.attributes.email
         }
         const group = null
         if(groups != undefined && groups.findIndex(item => item === 'admin') >= 0){
@@ -75,11 +76,6 @@ export default {
     })
   },
   mounted(){
-    console.log(document.querySelector("amplify-authenticator > amplify-sign-in").shadowRoot.querySelector("#password-hint"))
-    const hint = document.querySelector("amplify-authenticator > amplify-sign-in").shadowRoot.querySelector("#password-hint")
-    console.log("hint", hint)
-    
-    console.log("aaa", document.getElementById("password-hint"))
   },
   beforeUnmount() {
     this.unsubscribeAuth();
