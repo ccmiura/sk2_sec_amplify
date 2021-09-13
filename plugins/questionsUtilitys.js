@@ -101,7 +101,7 @@ async function getQuestionsMasterList(){
 }
 async function getQuestion(question_id){
   const rest = await API.graphql(graphqlOperation(getQuestionsMaster, {question_id: question_id, sortDirection: "ASC"}))
-  rest.data.getQuestionsMaster.questions.items.sort((a, b) => a.question_sub_id - b.question_sub_id)
+  //rest.data.getQuestionsMaster.questions.items.sort((a, b) => a.question_sub_id - b.question_sub_id)
   return rest.data.getQuestionsMaster
 }
 

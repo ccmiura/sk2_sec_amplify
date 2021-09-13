@@ -7,7 +7,7 @@ type QuestionsMaster
   title: String!
   participants: Int
   taken: Int
-  questions: [QuestionsSubMaster] @connection(keyName: "questionsSubMasterIndex", fields:["question_id"], sortField: "question_sub_id")
+  questions: [QuestionsSubMaster] @connection(fields:["question_id"])
   dummy: String!
   createdAt: AWSDateTime!
 }
@@ -23,7 +23,7 @@ type QuestionsSubMaster
   ans: [String]!
   correct: Int!
   comment: String
-  questionmaster: QuestionsMaster @connection(fields: ["question_id"], sortField: "question_sub_id")
+  questionmaster: QuestionsMaster @connection(fields: ["question_id"])
 }
 
 type UserResult
