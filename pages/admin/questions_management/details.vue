@@ -30,19 +30,19 @@
                 
               </tr>
               <tr>
-                <th style="writing-mode: vertical-rl;text-align: center;">問題文</th><td colspan="3">{{item.question}}</td>
+                <th style="text-align: center;">問題文</th><td colspan="3">{{item.question}}</td>
               </tr>
               <tr>
-                <th style="writing-mode: vertical-rl;text-align: center;">回答群</th>
+                <th style="text-align: center;">回答群</th>
                 <td>
                   <ol>
                     <li v-for="(value, index2) in item.ans" :key="index2">{{value}}</li>
                   </ol>
                 </td>
-                <th style="writing-mode: vertical-rl;text-align: center;">正答</th><td>{{item.correct}}. {{item.ans[item.correct - 1]}}</td>
+                <th style="text-align: center;">正答</th><td>{{item.correct}}. {{item.ans[item.correct - 1]}}</td>
               </tr>
               <tr>
-                <th style="writing-mode: vertical-rl;text-align: center;">解説</th><td colspan="3">{{item.comment}}</td>
+                <th style="text-align: center;">解説</th><td colspan="3">{{item.comment}}</td>
               </tr>
               </template>
             </tbody>

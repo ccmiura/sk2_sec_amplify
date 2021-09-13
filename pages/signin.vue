@@ -3,9 +3,6 @@
       <amplify-sign-in slot="sign-in" :form-fields.prop="formFields">
         <div slot="secondary-footer-content"></div>
       </amplify-sign-in>
-      <div v-if="authState === 'signedin' && user">
-        <div>Hello, {{user.username}}</div>
-      </div>
     </amplify-authenticator>
 </template>
 <script>
