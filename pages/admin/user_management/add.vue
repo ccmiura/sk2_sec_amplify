@@ -9,7 +9,7 @@
   </v-row>
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
-      <v-form v-model="valid">
+      <v-form v-model="valid" ref="form">
         <v-row>
           <v-text-field
             v-model="email"
@@ -124,13 +124,6 @@ export default {
     console.log("/admin/user_management/add mounted")
     console.log("valid", this.valid)
   },
-  computed: {
-    toggle () {
-      const icon = this.show ? 'mdi-eye' : 'mdi-eye-off'
-      const type = this.show ? 'text' : 'password'
-      return { icon, type }
-    }
-  },
   methods:{
     async addUser(){
       console.log(this.email, this.userName, this.user_id, this.addUserPassword, this.confirmPassword, this.valid)
@@ -150,10 +143,7 @@ export default {
       }
     },
     clear(){
-      this.email = ""
-      this.userName = ""
-      this.user_id = ""
-      this.valid = false
+      this.$refs.form.reset()
       this.success = false
     }
   }
