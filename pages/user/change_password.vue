@@ -180,15 +180,13 @@ export default {
         )
         this.progress = false
         this.change = true
-
+        this.goHome()
       }catch(err){
         this.progress = false
         console.log(err)
         this.alert=true
         this.message = err
         
-      }finally{
-        this.goHome()
       }
       
     }

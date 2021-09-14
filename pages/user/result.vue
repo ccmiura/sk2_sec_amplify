@@ -48,7 +48,7 @@ import { getQuestionsMaster, getUserResult } from '~/src/graphql/queries'
 export default {
   async asyncData({route, store}){
     const question_id = route.query.question_id
-    const user_id = store.getters['userInfo/userInfo'].username
+    const user_id = store.getters['userInfo/userInfo'].user_id
     console.log("question_id", question_id)
     console.log("user_id", user_id)
     let questionMaster = null

@@ -15,7 +15,7 @@
           <tbody>
             <tr>
               <td>username</td>
-              <td>{{user.username}}</td>
+              <td>{{user.user_id}}</td>
             </tr>
             <tr>
               <td>名前</td>
@@ -79,12 +79,12 @@ export default ({
     user: {}
   }),
   async asyncData({route, $authUtilitys}){
-    const username = route.query.Username
-    const {...rest } =  await $authUtilitys.getUser(username);
+    const user_id = route.query.user_id
+    const {...rest } =  await $authUtilitys.getUser(user_id);
     
     console.log(rest)
     const user = {
-      username: rest.Username,
+      user_id: rest.Username,
       name: rest.UserAttributes.find(e => e.Name === 'name').Value,
       email: rest.UserAttributes.find(e => e.Name === 'email').Value,
     }
@@ -98,12 +98,12 @@ export default ({
       try{
         this.dialog = false
         this.progress = true
-        const listUserResult = await this.$userResultUtilitys.getListUserResult(this.user.username)
+        const listUserResult = await this.$userResultUtilitys.getListUserResult(this.user.user_id)
         console.log(listUserResult)
         listUserResult.forEach(async e=> {
           await this.$userResultUtilitys.delUserResult(e.user_id, e.question_id)
         })
-        const res = await this.$authUtilitys.deleteUser(this.user.username)
+        const res = await this.$authUtilitys.deleteUser(this.user.user_id)
         console.log(res)
         this.progress = false
         this.$router.push("/admin/user_management")

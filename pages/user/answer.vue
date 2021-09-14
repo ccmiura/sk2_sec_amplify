@@ -118,7 +118,7 @@ export default {
       let userInfo = this.$store.getters['userInfo/userInfo']
       let ans = {
         question_id: this.question_id,
-        user_id: userInfo.username,
+        user_id: userInfo.user_id,
         name: userInfo.name,
         answers: this.radioGroup,
         correct_answers: correctAnswers,

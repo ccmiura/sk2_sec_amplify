@@ -66,7 +66,7 @@ export default {
     const userInfo = store.getters['userInfo/userInfo']
     try{
       promiseList.push($questionsUtilitys.getQuestionsMasterList())
-      promiseList.push(API.graphql(graphqlOperation(listUserResults,{user_id: userInfo.username})))
+      promiseList.push(API.graphql(graphqlOperation(listUserResults,{user_id: userInfo.user_id})))
       const result = await Promise.all(promiseList)
       console.log(result)
       result[0].forEach(element => {

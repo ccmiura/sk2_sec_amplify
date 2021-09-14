@@ -28,8 +28,8 @@
               v-for="item in users"
               :key="item.Username"
             >
-              <td><nuxt-link :to="`/admin/user_management/details?Username=${item.Username}`">{{ item.name }}</nuxt-link></td>
-              <td><v-icon @click.stop="goto(`/admin/user_management/delete?Username=${item.Username}`)">mdi-delete</v-icon></td>
+              <td><nuxt-link :to="`/admin/user_management/details?user_id=${item.Username}`">{{ item.name }}</nuxt-link></td>
+              <td><v-icon @click.stop="goto(`/admin/user_management/delete?user_id=${item.Username}`)">mdi-delete</v-icon></td>
             </tr>
           </tbody>
         </template>

@@ -54,6 +54,7 @@ export default {
 
         const userInfo = {
           username: authData.username,
+          user_id: authData.username,
           name: "name" in authData.attributes ? authData.attributes.name : undefined,
           email: authData.attributes.email
         }

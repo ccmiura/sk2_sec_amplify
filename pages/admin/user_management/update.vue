@@ -14,15 +14,15 @@
         <v-row>
           <v-text-field
             v-model="email"
-            :rules="emailRules"
             label="E-MAIL"
             required
+            :rules="[rules.required, rules.email]"
           ></v-text-field>
         </v-row>
         <v-row>
           <v-text-field
             v-model="userName"
-            :rules="userNameRules"
+            :rules="[rules.required]"
             label="名前"
             :count=255
             required
@@ -79,29 +79,27 @@ export default {
     progress: false,
     email: "",
     userName: "",
-    emailRules:[
-      v => !!v || 'Ｅメールは必須です。',
-      v => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(v) || 'emailの書式が正しくありません。'
-    ],
-    userNameRules: [v => !!v || '名前は必須です。'],
-    show: false,
+    rules:{
+      required: v => !!v || '必須項目です。',
+      email: v => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(v) || 'emailの書式が正しくありません。'
+    },
     type: "error",
     message: "",
     alert: false
   }),
   async asyncData({route, $authUtilitys}){
-    const username = route.query.Username
-    const {...rest } =  await $authUtilitys.getUser(username);
+    const user_id = route.query.user_id
+    const {...rest } =  await $authUtilitys.getUser(user_id);
     
     console.log(rest)
     const user = {
-      username: rest.Username,
+      user_id: rest.Username,
       name: rest.UserAttributes.find(e => e.Name === 'name').Value,
       email: rest.UserAttributes.find(e => e.Name === 'email').Value,
     }
     
     return {
-      home: `/admin/user_management/details?Username=${user.username}`,
+      home: `/admin/user_management/details?user_id=${user.user_id}`,
       user: user,
       email: user.email,
       userName: user.name
@@ -111,13 +109,6 @@ export default {
     console.log("/admin/user_management/add mounted")
     console.log("valid", this.valid)
   },
-  computed: {
-    toggle () {
-      const icon = this.show ? 'mdi-eye' : 'mdi-eye-off'
-      const type = this.show ? 'text' : 'password'
-      return { icon, type }
-    }
-  },
   methods:{
     async updateUser(){
       console.log(this.email, this.userName, this.addUserPassword, this.confirmPassword, this.valid)
@@ -126,8 +117,9 @@ export default {
         try{
           this.dialog = false
           this.progress = true
-          const result = await this.$authUtilitys.updateUser(this.user.username, this.email, this.userName)
+          const result = await this.$authUtilitys.updateUser(this.user.user_id, this.email, this.userName)
           console.log(result)
+          this.$store.commit('userInfo/update', this.email, this.userName) 
           this.progress = false
         }catch(err){
           console.log(err)
