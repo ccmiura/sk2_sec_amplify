@@ -18,20 +18,20 @@
           <template>
             <thead>
               <tr>
-                <th>No.</th>
-                <th>問題</th>
-                <th>あなたの回答</th>
-                <th>正解</th>
-                <th>解説</th>
+                <th class="text-center">No.</th>
+                <th class="text-center">問題</th>
+                <th class="text-center">あなたの回答</th>
+                <th class="text-center">正解</th>
+                <th class="text-center">解説</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(item, index) in data"
-                :key="item.question_sub_id" :style="{backgroundColor: (item.ans === item.correct ? '#BBDEFB' : '#FFCDD2' ) }">
+                :key="item.question_sub_id" :style="{backgroundColor: (item.answer === item.correct ? '#BBDEFB' : '#FFCDD2' ) }">
                 <td>{{index + 1}}</td>
                 <td>{{item.question}}</td>
-                <td>{{item.ans}}</td>
-                <td>{{item.correct}}</td>
+                <td>{{item.answer}}. {{item.ans[item.answer-1]}}</td>
+                <td>{{item.correct}}. {{item.ans[item.correct-1]}}</td>
                 <td>{{item.comment}}</td>
               </tr>
             </tbody>
@@ -43,10 +43,10 @@
 </template>
 <script>
 import { API } from 'aws-amplify'
-import { getQuestionsMaster, getUserResult } from '~/src/graphql/queries'
+import { getUserResult } from '~/src/graphql/queries'
 
 export default {
-  async asyncData({route, store}){
+  async asyncData({route, store, $questionsUtilitys}){
     const question_id = route.query.question_id
     const user_id = store.getters['userInfo/userInfo'].user_id
     console.log("question_id", question_id)
@@ -55,17 +55,16 @@ export default {
     const data = []
     let promise_list = []
     try{
-      promise_list.push(API.graphql({query: getQuestionsMaster, variables: {question_id: question_id}}))
+      promise_list.push($questionsUtilitys.getQuestion(question_id))
       promise_list.push(API.graphql({query: getUserResult, variables: {question_id: question_id, user_id: user_id}}))
       const res = await Promise.all(promise_list)
       console.log(res)
-      res[0].data.getQuestionsMaster.questions.items.sort((a, b)=> a.question_sub_id - b.question_sub_id)
-      res[0].data.getQuestionsMaster.questions.items.forEach((e, i) => {
+      res[0].questions.items.forEach((e, i) => {
         const tmp = Object.assign({}, e)
-        tmp["ans"] = res[1].data.getUserResult.answers[i]
+        tmp["answer"] = res[1].data.getUserResult.answers[i]
         data.push(tmp)
       });
-      questionMaster = res[0].data.getQuestionsMaster
+      questionMaster = res[0]
 
     }catch(err){
       console.log(err)

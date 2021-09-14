@@ -22,7 +22,8 @@
             <tr v-for="item in data"
               :key="item.question_id">
               <td class="">
-                <div v-if="item.status < 2"><nuxt-link :to="`/user/answer?question_id=${item.question_id}`">{{item.title}}</nuxt-link></div>
+                <div v-if="item.status <= 1"><nuxt-link :to="`/user/answer?question_id=${item.question_id}`">{{item.title}}</nuxt-link></div>
+                <div v-else-if="item.status == 2"><nuxt-link :to="`/user/result?question_id=${item.question_id}`">{{item.title}}</nuxt-link></div>
                 <div v-else>{{item.title}}</div>
               </td>
               <td class="text-center" style="font-size: 8pt;white-space: nowrap;">{{statusString(item.status)}}</td>
