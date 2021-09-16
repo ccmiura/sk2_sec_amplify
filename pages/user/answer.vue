@@ -124,7 +124,7 @@ export default {
         name: userInfo.name,
         answers: this.radioGroup,
         correct_answers: correctAnswers,
-        status: correctAnswers === this.radioGroup.length? 2 : 1
+        status: correctAnswers === this.questionsMaster.questions.items.length? 2 : 1
       }
       console.log(ans)
       try {
