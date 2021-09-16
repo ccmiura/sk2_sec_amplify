@@ -48,7 +48,7 @@
           width="500"
         >
           <template v-slot:activator="{ on, attrs }">
-            <v-btn class="mr-3" @click.stop="dialog = true">回答</v-btn>
+            <v-btn class="mr-3" :disabled="!valid" @click.stop="dialog = true">回答</v-btn>
           </template>
 
           <v-card>
@@ -84,10 +84,12 @@ export default {
   data: () => ({
     radioGroup: [],
     dialog: false,
+    valid: false
   }),
   watch: {
     radioGroup: function (val) {
-      console.log(val, val.length)
+      console.log(val, val.length, this.valid)
+      this.valid = this.questionsMaster.questions.items.length === val.length
     }
   },
   async asyncData({route, $questionsUtilitys}){
