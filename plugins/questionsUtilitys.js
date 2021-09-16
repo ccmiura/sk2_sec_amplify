@@ -106,7 +106,7 @@ async function getQuestion(question_id){
 }
 
 async function deleteQuestion(question_id){
-  const data = await getQuestion(quesion_id)
+  const data = await getQuestion(question_id)
   const promiseList = []
   promiseList.push(API.graphql(graphqlOperation(deleteQuestionsMaster, {input: {question_id: question_id}})))
   promiseList.concat(data.questions.items.map((v)=>{

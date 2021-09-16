@@ -69,10 +69,10 @@ export default {
     message: "",
     type: "error"
   }),
-  async asyncData({route, $questionsUtility}){
+  async asyncData({route, $questionsUtilitys}){
     const question_id = route.query.question_id
     console.log("question_id", question_id)
-    const data = $questionsUtility.getQuestion(question_id)
+    const data = await $questionsUtilitys.getQuestion(question_id)
     return {
       questionsMaster: data,
       question_id: question_id
@@ -86,7 +86,7 @@ export default {
       this.progress = true
       
       try{
-        await this.$questionsUtility.deleteQuestion(this.question_id)
+        await this.$questionsUtilitys.deleteQuestion(this.question_id)
         this.progress = false
         this.$router.push("/admin/questions_management")
       }catch(err){
