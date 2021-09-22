@@ -18,22 +18,26 @@
           <template>
             <thead>
               <tr>
-                <th class="text-center">No.</th>
-                <th class="text-center">問題</th>
-                <th class="text-center">あなたの回答</th>
-                <th class="text-center">正解</th>
-                <th class="text-center">解説</th>
+                <th>No.</th>
+                <th colspan="4" >内容</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in data"
-                :key="item.question_sub_id" :style="{backgroundColor: (item.answer === item.correct ? '#BBDEFB' : '#FFCDD2' ) }">
-                <td>{{index + 1}}</td>
-                <td>{{item.question}}</td>
-                <td>{{item.answer}}. {{item.ans[item.answer-1]}}</td>
-                <td>{{item.correct}}. {{item.ans[item.correct-1]}}</td>
-                <td>{{item.comment}}</td>
-              </tr>
+              <template v-for="(item, index) in data">
+                <tr :key="item.question_sub_id" :style="{backgroundColor: (item.answer === item.correct ? '#BBDEFB' : '#FFCDD2' ) }">
+                  <td rowspan="4">{{index + 1}}</td>
+                </tr>
+                <tr>
+                  <th style="text-align: center;">問題文</th><td colspan="3">{{item.question}}</td>
+                </tr>
+                <tr>
+                  <th style="text-align: center;">回答</th><td>{{item.answer}}. {{item.ans[item.answer-1]}}</td>
+                  <th style="text-align: center;">正答</th><td>{{item.correct}}. {{item.ans[item.correct - 1]}}</td>
+                </tr>
+                <tr>
+                  <th style="text-align: center;">解説</th><td colspan="3">{{item.comment}}</td>
+                </tr>
+              </template>
             </tbody>
           </template>
         </v-simple-table>

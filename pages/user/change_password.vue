@@ -1,6 +1,5 @@
 <template>
   <v-container>
-  <v-alert v-model="alert" :type="type">{{message}}</v-alert>
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
@@ -108,9 +107,6 @@
       </v-row>
     </v-col>
   </v-row>
-  <v-overlay :value="progress">
-    <v-progress-circular indeterminate color="primary"></v-progress-circular>
-  </v-overlay>
   <v-overlay :value="change">
     <v-card light>
       <v-card-title class="text-h5 grey lighten-2">
@@ -118,11 +114,11 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-actions>
-        <v-spacer></v-spacer>
         <v-btn
           light
           color="primary"
           text
+          class="mx-auto"
           @click.stop="goHome"
         >
           OK
@@ -170,7 +166,8 @@ export default {
   methods:{
     async changePassword(){
       this.dialog = false
-      this.progress = true
+      this.$store.commit("message/clear")
+      this.$store.commit("progress/on")
       try{
         const user = await Auth.currentAuthenticatedUser() // ログイン中のユーザー情報
         await Auth.changePassword(
@@ -178,15 +175,12 @@ export default {
           this.oldPassword, // 現在のパスワード
           this.newPassword  // 新しいパスワード
         )
-        this.progress = false
+        this.$store.commit("progress/off")
         this.change = true
-        this.goHome()
       }catch(err){
-        this.progress = false
+        this.$store.commit("progress/off")
         console.log(err)
-        this.alert=true
-        this.message = err
-        
+        this.store.commit("message/putMessage", err)
       }
       
     }

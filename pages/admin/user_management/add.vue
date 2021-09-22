@@ -73,9 +73,6 @@
       </v-row>
     </v-col>
   </v-row>
-  <v-overlay :value="progress">
-    <v-progress-circular indeterminate color="primary"></v-progress-circular>
-  </v-overlay>
   <v-dialog
     v-model="success"
     width="500"
@@ -103,7 +100,6 @@ export default {
     home: "/admin/user_management",
     valid: false,
     dialog: false,
-    progress: false,
     email: "",
     userName: "",
     user_id: "",
@@ -132,14 +128,12 @@ export default {
       }
       try{
         this.dialog = false
-        this.progress = true
-        const result = await this.$authUtilitys.addUser(this.email, this.user_id, this.userName)
+        //const result = await this.$authUtilitys.addUser(this.email, this.user_id, this.userName)
+        const result = await this.$executer.executeWithExc(this.$authUtilitys.addUser, this.email, this.user_id, this.userName)
         console.log(result)
-        this.progress = false
         this.success = true
       }catch(err){
         console.log(err)
-        this.progress = false
       }
     },
     clear(){

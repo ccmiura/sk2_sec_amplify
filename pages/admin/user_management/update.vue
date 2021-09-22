@@ -1,6 +1,5 @@
 <template>
   <v-container>
-  <v-alert v-model="alert" :type="type">{{message}}</v-alert>
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
@@ -65,9 +64,6 @@
       </v-row>
     </v-col>
   </v-row>
-  <v-overlay :value="progress">
-    <v-progress-circular indeterminate color="primary"></v-progress-circular>
-  </v-overlay>
   </v-container>
 </template>
 <script>
@@ -76,16 +72,12 @@ export default {
   data: () => ({
     valid: false,
     dialog: false,
-    progress: false,
     email: "",
     userName: "",
     rules:{
       required: v => !!v || '必須項目です。',
       email: v => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(v) || 'emailの書式が正しくありません。'
     },
-    type: "error",
-    message: "",
-    alert: false
   }),
   async asyncData({route, $authUtilitys}){
     const user_id = route.query.user_id
@@ -116,24 +108,17 @@ export default {
       if(this.email != this.user.email || this.userName != this.user.name){
         try{
           this.dialog = false
-          this.progress = true
-          const result = await this.$authUtilitys.updateUser(this.user.user_id, this.email, this.userName)
+          const result = await this.$executer.executeWithExc(this.$authUtilitys.updateUser, this.user.user_id, this.email, this.userName)
+          //const result = await this.$authUtilitys.updateUser(this.user.user_id, this.email, this.userName)
           console.log(result)
           this.$store.commit('userInfo/update', this.email, this.userName) 
-          this.progress = false
         }catch(err){
           console.log(err)
-          this.progress = false
           this.dialog = false
-          this.alert = true
-          this.type = "error"
-          this.message = err
         }
       }else{
+        this.$store.commit('message/putMessage', "変更箇所がないため更新できません。", "warning") 
         this.dialog = false
-        this.alert = true
-        this.type = "warning"
-        this.message = "変更箇所がないため更新できません。"
       }
     }
   }

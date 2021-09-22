@@ -128,7 +128,8 @@ export default {
       }
       console.log(ans)
       try {
-        const result = await this.$userResultUtilitys.upsertUserResult(ans)
+        //const result = await this.$userResultUtilitys.upsertUserResult(ans)
+        const result = await this.$executer.executeWithExc(this.$userResultUtilitys.upsertUserResult, ans)
         console.log(result)
         this.$router.push(`/user/result?question_id=${this.question_id}`)
       }catch(err){

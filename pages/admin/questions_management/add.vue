@@ -1,6 +1,5 @@
 <template>
   <v-container>
-  <v-alert v-model="alert" :type="type">{{message}}</v-alert>
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
@@ -63,9 +62,6 @@
       </v-row>
     </v-col>
   </v-row>
-  <v-overlay :value="progress">
-    <v-progress-circular indeterminate color="primary"></v-progress-circular>
-  </v-overlay>
   </v-container>
 </template>
 <script>
@@ -112,23 +108,17 @@ export default {
     async createQuestionData(){
       console.log(this.uploadfile)
       if(this.uploadfile != null){
-        this.alert = false
         this.dialog = false
-        this.progress = true
         console.log(this.uploadfile)
         const uuid = uuidv4()
         let res = null
         try{
-          res = await this.$questionsUtilitys.insertOp(uuid, this.title, this.uploadfile)
+          res = await this.$executer.executeWithExc(this.$questionsUtilitys.insertOp, uuid, this.title, this.uploadfile)
           console.log(res)
           this.upload = false
-          this.progress = false
           this.$router.push("/admin/questions_management")
         }catch(err){
           console.log(err)
-          this.progress = false
-          this.alert=true
-          this.message = err
         }
       }
     },

@@ -17,7 +17,9 @@
     </v-app-bar>
     <v-main>
       <v-container>
+        <message />
         <Nuxt />
+        <cprogress />
       </v-container>
     </v-main>
     <v-footer
@@ -32,6 +34,7 @@
 
 <script>
 import { Auth } from 'aws-amplify'
+import message from '../components/message.vue'
 export default {
   data: () => (
     {

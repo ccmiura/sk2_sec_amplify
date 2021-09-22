@@ -37,6 +37,7 @@ export default {
     { src: '~/plugins/authUtilitys.js', ssr: false },
     { src: '~/plugins/questionsUtilitys.js', ssr: false },
     { src: '~/plugins/userResultUtilitys.js', ssr: false },
+    { src: '~/plugins/executer.js', ssr: false },
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

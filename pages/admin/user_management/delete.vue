@@ -65,9 +65,6 @@
       </v-row>
     </v-col>
   </v-row>
-  <v-overlay :value="progress">
-    <v-progress-circular indeterminate color="primary"></v-progress-circular>
-  </v-overlay>
   </v-container>
 </template>
 <script>
@@ -97,7 +94,9 @@ export default ({
     async deleteUser(){
       try{
         this.dialog = false
-        this.progress = true
+        this.$store.commit("message/clear")
+        this.$store.commit("progress/on")
+
         const listUserResult = await this.$userResultUtilitys.getListUserResult(this.user.user_id)
         console.log(listUserResult)
         listUserResult.forEach(async e=> {
@@ -105,11 +104,12 @@ export default ({
         })
         const res = await this.$authUtilitys.deleteUser(this.user.user_id)
         console.log(res)
-        this.progress = false
+        this.$store.commit("progress/off")
         this.$router.push("/admin/user_management")
       }catch(err){
         console.log(err)
-        this.progress = false
+        this.$store.commit("message/putMessage", err)
+        this.$store.commit("progress/off")
         this.dialog = false
       }
     }
