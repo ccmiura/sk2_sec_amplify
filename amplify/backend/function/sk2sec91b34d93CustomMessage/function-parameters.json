@@ -1,0 +1,17 @@
+{
+  "trigger": true,
+  "modules": [
+    "custom"
+  ],
+  "parentResource": "sk2sec91b34d93",
+  "functionName": "sk2sec91b34d93CustomMessage",
+  "resourceName": "sk2sec91b34d93CustomMessage",
+  "parentStack": "auth",
+  "triggerEnvs": [],
+  "triggerDir": "/usr/lib/node_modules/@aws-amplify/cli/node_modules/amplify-category-auth/provider-utils/awscloudformation/triggers/CustomMessage",
+  "triggerTemplate": "CustomMessage.json.ejs",
+  "triggerEventPath": "CustomMessage.event.json",
+  "roleName": "sk2sec91b34d93CustomMessage",
+  "skipEdit": true,
+  "enableCors": false
+}
