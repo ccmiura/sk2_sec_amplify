@@ -3,6 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
+        <v-btn class="mr-3" @click.stop="inputClick">CSVで追加</v-btn>
         <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
       </v-row>
     </v-col>
@@ -66,7 +67,7 @@
               <v-btn
                 color="primary"
                 text
-                @click.stop="addUser">登録</v-btn>
+                @click.stop="callAddUser">登録</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -92,19 +93,30 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+    <input
+      style="display: none"
+      ref="multiInput"
+      type="file"
+      @change="selectedFile()"
+    />
   </v-container>
+
+  
 </template>
 <script>
+import Papa from 'papaparse'
 export default {
   data: () => ({
     home: "/admin/user_management",
     valid: false,
     dialog: false,
+    csv: false,
     email: "",
     userName: "",
     user_id: "",
     addUserPassword: "",
     confirmPassword: "",
+    uploadfile: [],
     emailRules:[
       v => !!v || 'Ｅメールは必須です。',
       v => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(v) || 'emailの書式が正しくありません。'
@@ -121,20 +133,64 @@ export default {
     console.log("valid", this.valid)
   },
   methods:{
-    async addUser(){
-      console.log(this.email, this.userName, this.user_id, this.addUserPassword, this.confirmPassword, this.valid)
-      if(this.user_id === ""){
-        this.user_id = this.email.split('@')[0]
-      }
+    async callAddUser(){
+      this.dialog = false
       try{
-        this.dialog = false
-        //const result = await this.$authUtilitys.addUser(this.email, this.user_id, this.userName)
-        const result = await this.$executer.executeWithExc(this.$authUtilitys.addUser, this.email, this.user_id, this.userName)
-        console.log(result)
+        if(this.csv){
+          await this.multiAddUser()
+          this.csv = false
+        }else{
+          await this.singleAddUser()
+        }
         this.success = true
+
       }catch(err){
         console.log(err)
       }
+    },
+    async singleAddUser(){
+      console.log(this.email, this.userName, this.user_id, this.valid)
+      await this.addUser(this.email, this.user_id, this.userName)
+    },
+    async multiAddUser(){
+      this.uploadfile.forEach(async element => {
+        await this.addUser(element.email, element.user_id, element.userName)
+      })
+    },
+    async addUser(email, user_id, userName){
+      console.log(email, userName, user_id)
+      if(user_id === ""){
+        user_id = email.split('@')[0]
+      }
+      const result = await this.$executer.executeWithExc(this.$authUtilitys.addUser, email, user_id, userName)
+      console.log(result)
+    },
+    inputClick(){
+      this.$refs.multiInput.click();
+    },
+    async selectedFile() {
+      const file = this.$refs.multiInput.files[0]
+      if (!file) {
+        return;
+      }
+      try {
+        const content = await this.readFileAsync(file)
+        this.uploadfile = Papa.parse(content, {header: true, skipEmptyLines: true}).data
+        this.valid = true
+        this.csv = true
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    readFileAsync (file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          resolve(reader.result)
+        }
+        reader.onerror = reject
+        reader.readAsText(file)
+      })
     },
     clear(){
       this.$refs.form.reset()
