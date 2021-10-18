@@ -19,22 +19,28 @@
           <template>
             <thead>
               <tr>
-                <th>No.</th>
-                <th>問題</th>
-                <th>選択肢</th>
+                <th class="text-center">No.</th>
+                
+                <th colspan="2" class="text-center">内容</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in questionsMaster.questions.items"
-                :key="item.question_sub_id">
-                <td>{{index + 1}}</td>
-                <td>{{item.question}}</td>
-                <td>
+              <template v-for="(item, index) in questionsMaster.questions.items" >
+              <tr :key="item.question_sub_id">
+                <td rowspan="3" class="text-center">{{index + 1}}</td>
+              </tr>
+              <tr>
+                <th class="text-center">問題</th><td class="text-left">{{item.question}}</td>
+              </tr>
+              <tr>
+                <th class="text-center">選択肢</th>
+                <td class="text-left text-sm-body2">
                   <v-radio-group :name="`grp_${index+1}`" v-model="radioGroup[index]">
                     <v-radio v-for="(value, index2) in item.ans" :key="index2" :label="value" :value="index2 + 1"></v-radio>
                   </v-radio-group>
                </td>
               </tr>
+              </template>
             </tbody>
           </template>
         </v-simple-table>

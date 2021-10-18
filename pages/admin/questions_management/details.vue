@@ -19,30 +19,38 @@
           <template>
             <thead>
               <tr>
-                <th>No.</th>
-                <th colspan="4" >内容</th>
+                <th class="text-center">No.</th>
+                <th colspan="2" class="text-center">内容</th>
               </tr>
             </thead>
             <tbody>
               <template v-for="(item, index) in questionsMaster.questions.items" >
               <tr :key="item.question_sub_id">
-                <td rowspan="4">{{index + 1}}</td>
+                <td rowspan="5">{{index + 1}}</td>
                 
               </tr>
               <tr>
-                <th style="text-align: center;">問題文</th><td colspan="3">{{item.question}}</td>
+                <th class="text-center">問題文</th><td>{{item.question}}</td>
               </tr>
               <tr>
-                <th style="text-align: center;">回答群</th>
-                <td>
+                <th class="text-center">回答群</th>
+                <td class="text-left">
                   <ol>
                     <li v-for="(value, index2) in item.ans" :key="index2">{{value}}</li>
                   </ol>
                 </td>
-                <th style="text-align: center;">正答</th><td>{{item.correct}}. {{item.ans[item.correct - 1]}}</td>
               </tr>
               <tr>
-                <th style="text-align: center;">解説</th><td colspan="3">{{item.comment}}</td>
+                <th class="text-center">正答</th>
+                <td class="text-left">
+                  <ol>
+                    <li :value="item.correct"> {{item.ans[item.correct - 1]}}</li>
+                  </ol>
+                </td>
+              </tr>
+              <tr>
+                <th class="text-center">解説</th>
+                <td class="text-left">{{item.comment}}</td>
               </tr>
               </template>
             </tbody>
