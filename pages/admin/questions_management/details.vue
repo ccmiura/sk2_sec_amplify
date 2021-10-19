@@ -19,14 +19,14 @@
           <template>
             <thead>
               <tr>
-                <th class="text-center">No.</th>
-                <th colspan="2" class="text-center">内容</th>
+                <th class="header_border_style text-center">No.</th>
+                <th colspan="2" class="header_border_style text-center">内容</th>
               </tr>
             </thead>
             <tbody>
               <template v-for="(item, index) in questionsMaster.questions.items" >
               <tr :key="item.question_sub_id">
-                <td rowspan="5">{{index + 1}}</td>
+                <td class="period_border_style text-center" rowspan="5">{{index + 1}}</td>
                 
               </tr>
               <tr>
@@ -49,8 +49,8 @@
                 </td>
               </tr>
               <tr>
-                <th class="text-center">解説</th>
-                <td class="text-left">{{item.comment}}</td>
+                <th class="period_border_style text-center">解説</th>
+                <td class="period_border_style text-left">{{item.comment}}</td>
               </tr>
               </template>
             </tbody>
@@ -60,6 +60,14 @@
   </v-row>
   </v-container>
 </template>
+<style>
+.period_border_style {
+  border-bottom: 3px solid rgba(0, 0, 0, 0.12) !important; 
+}
+.header_border_style {
+  border-bottom: 3px double rgba(0, 0, 0, 0.12) !important; 
+}
+</style>
 <script>
 export default {
   data: () => ({

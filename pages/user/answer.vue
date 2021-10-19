@@ -19,24 +19,23 @@
           <template>
             <thead>
               <tr>
-                <th class="text-center">No.</th>
-                
-                <th colspan="2" class="text-center">内容</th>
+                <th class="header_border_style text-center">No.</th>
+                <th colspan="2" class="header_border_style text-center">内容</th>
               </tr>
             </thead>
             <tbody>
               <template v-for="(item, index) in questionsMaster.questions.items" >
               <tr :key="item.question_sub_id">
-                <td rowspan="3" class="text-center">{{index + 1}}</td>
+                <td class="period_border_style text-center" rowspan="3" >{{index + 1}}</td>
               </tr>
               <tr>
                 <th class="text-center">問題</th><td class="text-left">{{item.question}}</td>
               </tr>
               <tr>
-                <th class="text-center">選択肢</th>
-                <td class="text-left text-sm-body2">
+                <th class="period_border_style text-center">選択肢</th>
+                <td class="period_border_style text-left">
                   <v-radio-group :name="`grp_${index+1}`" v-model="radioGroup[index]">
-                    <v-radio v-for="(value, index2) in item.ans" :key="index2" :label="value" :value="index2 + 1"></v-radio>
+                    <v-radio class="text-sm" v-for="(value, index2) in item.ans" :key="index2" :label="value" :value="index2 + 1"></v-radio>
                   </v-radio-group>
                </td>
               </tr>
@@ -85,12 +84,26 @@
   </v-row>
   </v-container>
 </template>
+<style>
+.v-label {
+  font-size: 0.875rem;
+}
+.v-icon.v-icon {
+  font-size: 0.875rem;
+}
+.period_border_style {
+  border-bottom: 3px solid rgba(0, 0, 0, 0.12) !important; 
+}
+.header_border_style {
+  border-bottom: 3px double rgba(0, 0, 0, 0.12) !important; 
+}
+</style>
 <script>
 export default {
   data: () => ({
     radioGroup: [],
     dialog: false,
-    valid: false
+    valid: false,
   }),
   watch: {
     radioGroup: function (val) {
