@@ -86,10 +86,10 @@
 </template>
 <style>
 .v-label {
-  font-size: 0.875rem;
+  font-size: 0.875rem !important;
 }
 .v-icon.v-icon {
-  font-size: 0.875rem;
+  font-size: 0.875rem !important;
 }
 .period_border_style {
   border-bottom: 3px solid rgba(0, 0, 0, 0.12) !important; 
