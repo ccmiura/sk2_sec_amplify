@@ -9,7 +9,23 @@
   </v-row>
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
-        <v-card><v-card-text>{{questionsMaster.title}}</v-card-text></v-card>
+        <v-card><v-card-text class="text-no-wrap">{{questionsMaster.title}}</v-card-text></v-card>
+    </v-col>
+  </v-row>
+  <v-row justify="center">
+    <v-col cols="12" sm="8" md="8" lg="8" xl="8">
+        <v-card>
+          <v-row class="justify-content:space-evenly;">
+            <v-spacer/>
+            <v-col class="pa-0">
+              <v-card-title style="white-space : nowrap;">{{point * 10}}点</v-card-title>
+            </v-col>
+            <v-col class="pa-0">
+              <v-card-title style="white-space : nowrap;">{{passFail ? "合格": "不合格"}}</v-card-title>
+            </v-col>
+            <v-spacer/>
+          </v-row>
+        </v-card>
     </v-col>
   </v-row>
   <v-row justify="center">
@@ -24,28 +40,28 @@
             </thead>
             <tbody>
               <template v-for="(item, index) in data" >
-                <tr :key="item.question_sub_id" :style="getBgColor(item.answer, item.correct)">
+                <tr :key="item.question_sub_id" :style="item.style">
                   <td rowspan="5" class="period_border_style text-center">{{index + 1}}</td>
                   <td class="pl-1 pr-1 period_border_style" rowspan="5">
-                    <v-icon class="pl-0 pr-0" large v-if="item.answer === item.correct" color="green darken-2">mdi-checkbox-blank-circle-outline</v-icon>
+                    <v-icon class="pl-0 pr-0" large v-if="item.rightWrong" color="green darken-2">mdi-checkbox-blank-circle-outline</v-icon>
                     <v-icon large v-else color="red darken-2">mdi-close</v-icon>
                   </td>
                 </tr>
-                <tr :style="getBgColor(item.answer, item.correct)">
+                <tr :style="item.style">
                   <th class="text-center">問題文</th><td class="text-left">{{item.question}}</td>
                 </tr>
-                <tr :style="getBgColor(item.answer, item.correct)">
+                <tr :style="item.style">
                   <th class="text-center">正答</th>
-                    <td class="text-left">
+                    <td class="text-left ex_seito">
                       <ul class="pl-0">
                         <li v-for="(a, i) in item.ans" :key="i" :class="[(i === (item.correct - 1)) ? 'ex_seikai':'ex_fuseikai', 'pl-4']">{{a}}</li>
                       </ul>
                     </td>
                 </tr>
-                <tr :style="getBgColor(item.answer, item.correct)">
-                  <th class="text-center">回答</th><td class="text-left">{{item.answer}}. {{item.ans[item.answer-1]}}</td>
+                <tr :style="item.style">
+                  <th class="text-center">回答</th><td class="text-left">{{item.ans[item.answer-1]}}</td>
                 </tr>
-                <tr :style="getBgColor(item.answer, item.correct)">
+                <tr :style="item.style">
                   <th class="period_border_style text-center" >解説</th><td class="period_border_style text-left">{{item.comment}}</td>
                 </tr>
               </template>
@@ -63,12 +79,12 @@
 .header_border_style {
   border-bottom: 3px double rgba(0, 0, 0, 0.12) !important; 
 }
-ul {
+.ex_seito ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-ul li {
+.ex_seito ul li {
   position: relative;
   padding: 0 0 0 2em;
   margin: 0;
@@ -101,17 +117,28 @@ export default {
     let questionMaster = null
     const data = []
     let promise_list = []
+    let passFail = false
+    let point = 0
     try{
       promise_list.push($questionsUtilitys.getQuestion(question_id))
       promise_list.push(API.graphql({query: getUserResult, variables: {question_id: question_id, user_id: user_id}}))
       const res = await Promise.all(promise_list)
       console.log(res)
+      
       res[0].questions.items.forEach((e, i) => {
         const tmp = Object.assign({}, e)
         tmp["answer"] = res[1].data.getUserResult.answers[i]
+        tmp["rightWrong"] = false
+        tmp["style"] = "backgroundColor: #FFCDD2;"
+        if(tmp["answer"] === tmp["correct"]){
+          tmp["rightWrong"] = true
+          tmp["style"] = "backgroundColor: #E8F5E9;"
+          ++point
+        }
         data.push(tmp)
       });
       questionMaster = res[0]
+      passFail = data.length === point
 
     }catch(err){
       console.log(err)
@@ -119,7 +146,9 @@ export default {
     return {
       question_id: question_id,
       questionsMaster: questionMaster,
-      data: data
+      passFail: passFail,
+      data: data,
+      point: point,
     }
 
   },

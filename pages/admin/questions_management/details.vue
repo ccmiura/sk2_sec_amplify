@@ -10,7 +10,7 @@
   </v-row>
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
-      <v-card><v-card-text>{{questionsMaster.title}}</v-card-text></v-card>
+      <v-card><v-card-text class="text-no-wrap">{{questionsMaster.title}}</v-card-text></v-card>
     </v-col>
   </v-row>
   <v-row justify="center">
@@ -34,18 +34,16 @@
               </tr>
               <tr>
                 <th class="text-center">回答群</th>
-                <td class="text-left">
-                  <ol>
+                <td class="text-left ex_kaitougun">
+                  <ul>
                     <li v-for="(value, index2) in item.ans" :key="index2">{{value}}</li>
-                  </ol>
+                  </ul>
                 </td>
               </tr>
               <tr>
                 <th class="text-center">正答</th>
-                <td class="text-left">
-                  <ol>
-                    <li :value="item.correct"> {{item.ans[item.correct - 1]}}</li>
-                  </ol>
+                <td class="text-left" style="text-indent: -1rem; padding-left: 2rem;">
+                  {{item.ans[item.correct - 1]}}
                 </td>
               </tr>
               <tr>
@@ -66,6 +64,15 @@
 }
 .header_border_style {
   border-bottom: 3px double rgba(0, 0, 0, 0.12) !important; 
+}
+.ex_kaitougun ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ex_kaitougun ul li {
+  text-indent: -1rem;
+  padding-left: 1rem;
 }
 </style>
 <script>

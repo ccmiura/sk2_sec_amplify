@@ -9,7 +9,7 @@
   </v-row>
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
-        <v-card><v-card-text>{{questionsMaster.title}}</v-card-text></v-card>
+        <v-card><v-card-text class="text-no-wrap">{{questionsMaster.title}}</v-card-text></v-card>
     </v-col>
   </v-row>
   <v-row justify="center">
@@ -35,7 +35,7 @@
                 <th class="period_border_style text-center">選択肢</th>
                 <td class="period_border_style text-left">
                   <v-radio-group :name="`grp_${index+1}`" v-model="radioGroup[index]">
-                    <v-radio class="text-sm" v-for="(value, index2) in item.ans" :key="index2" :label="value" :value="index2 + 1"></v-radio>
+                    <v-radio class="ex_v-radio" v-for="(value, index2) in item.ans" :key="index2" :label="value" :value="index2 + 1"></v-radio>
                   </v-radio-group>
                </td>
               </tr>
@@ -85,10 +85,10 @@
   </v-container>
 </template>
 <style>
-.v-label {
+.ex_v-radio .v-label {
   font-size: 0.875rem !important;
 }
-.v-icon.v-icon {
+.ex_v-radio .v-icon.v-icon {
   font-size: 0.875rem !important;
 }
 .period_border_style {
