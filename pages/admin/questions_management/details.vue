@@ -26,7 +26,7 @@
             <tbody>
               <template v-for="(item, index) in questionsMaster.questions.items" >
               <tr :key="item.question_sub_id">
-                <td class="period_border_style text-center" rowspan="5">{{index + 1}}</td>
+                <td class="period_border_style text-center" rowspan="6">{{index + 1}}</td>
                 
               </tr>
               <tr>
@@ -47,9 +47,14 @@
                 </td>
               </tr>
               <tr>
-                <th class="period_border_style text-center">解説</th>
-                <td class="period_border_style text-left">{{item.comment}}</td>
+                <th class="text-center">解説</th>
+                <td class="text-left">{{item.comment}}</td>
               </tr>
+              <tr>
+                <th class="period_border_style text-center">正解率</th>
+                <td class="period_border_style text-left">{{item.correctAnswerRate * 100}}%</td>
+              </tr>
+
               </template>
             </tbody>
           </template>
@@ -76,20 +81,38 @@
 }
 </style>
 <script>
+import { API } from 'aws-amplify'
+import { firstUserResult_question_idIndex } from '~/src/graphql/queries'
+
 export default {
   data: () => ({
     home: "/admin/questions_management"
   }),
-  async asyncData({route, $questionsUtilitys}){
+  async asyncData({route, $questionsUtilitys, $userResultUtilitys}){
     const question_id = route.query.question_id
     console.log("question_id", question_id)
     let data = {}
+    let results = null
+    let listAnswer = []
     try{
       data = await $questionsUtilitys.getQuestion(question_id)
       console.log(data)
+      results = await $userResultUtilitys.getFirstUserResult_question_idIndex(question_id)
+      console.log(results)
+      const count = results.length
+      data.questions.items.forEach(d => listAnswer.push([]))
+      results.forEach(result => {
+        result.answers.forEach((a, i) => listAnswer[i].push(a))
+      })
+      console.log(listAnswer)
+      data.questions.items.forEach((item, index) =>{
+        let tmp = listAnswer[index].filter(v => v === item.correct)
+        item["correctAnswerRate"] = count ? tmp.length / count : 0
+      })      
     }catch(err){
       console.log(err)
     }
+    console.log(data)
     return {
       question_id: question_id,
       questionsMaster: data

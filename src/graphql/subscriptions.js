@@ -199,3 +199,45 @@ export const onDeleteUserResult = /* GraphQL */ `
     }
   }
 `;
+export const onCreateFirstUserResult = /* GraphQL */ `
+  subscription OnCreateFirstUserResult {
+    onCreateFirstUserResult {
+      user_id
+      question_id
+      name
+      status
+      answers
+      correct_answers
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateFirstUserResult = /* GraphQL */ `
+  subscription OnUpdateFirstUserResult {
+    onUpdateFirstUserResult {
+      user_id
+      question_id
+      name
+      status
+      answers
+      correct_answers
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteFirstUserResult = /* GraphQL */ `
+  subscription OnDeleteFirstUserResult {
+    onDeleteFirstUserResult {
+      user_id
+      question_id
+      name
+      status
+      answers
+      correct_answers
+      createdAt
+      updatedAt
+    }
+  }
+`;

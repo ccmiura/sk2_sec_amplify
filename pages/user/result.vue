@@ -35,17 +35,13 @@
             <thead>
               <tr>
                 <th class="header_border_style text-center">No.</th>
-                <th colspan="4" class="header_border_style text-center">内容</th>
+                <th colspan="3" class="header_border_style text-center">内容</th>
               </tr>
             </thead>
             <tbody>
               <template v-for="(item, index) in data" >
                 <tr :key="item.question_sub_id" :style="item.style">
                   <td rowspan="5" class="period_border_style text-center">{{index + 1}}</td>
-                  <td class="pl-1 pr-1 period_border_style" rowspan="5">
-                    <v-icon class="pl-0 pr-0" large v-if="item.rightWrong" color="green darken-2">mdi-checkbox-blank-circle-outline</v-icon>
-                    <v-icon large v-else color="red darken-2">mdi-close</v-icon>
-                  </td>
                 </tr>
                 <tr :style="item.style">
                   <th class="text-center">問題文</th><td class="text-left">{{item.question}}</td>
@@ -59,7 +55,12 @@
                     </td>
                 </tr>
                 <tr :style="item.style">
-                  <th class="text-center">回答</th><td class="text-left">{{item.ans[item.answer-1]}}</td>
+                  <th class="text-center">回答</th>
+                    <td class="text-left ex_seito">
+                      <ul class="pl-0">
+                        <li :class="[(item.answer == item.correct) ? 'ex_seikai': 'ex_fuseikai', 'pl-4']">{{item.ans[item.answer-1]}}</li>
+                      </ul>
+                    </td>
                 </tr>
                 <tr :style="item.style">
                   <th class="period_border_style text-center" >解説</th><td class="period_border_style text-left">{{item.comment}}</td>

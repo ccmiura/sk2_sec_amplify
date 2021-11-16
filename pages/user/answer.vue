@@ -111,7 +111,7 @@ export default {
       this.valid = this.questionsMaster.questions.items.length === val.length
     }
   },
-  async asyncData({route, $questionsUtilitys}){
+  async asyncData({store, route, $questionsUtilitys, $userResultUtilitys}){
     const question_id = route.query.question_id
     console.log("question_id", question_id)
     let data = null
@@ -148,8 +148,10 @@ export default {
       console.log(ans)
       try {
         //const result = await this.$userResultUtilitys.upsertUserResult(ans)
-        const result = await this.$executer.executeWithExc(this.$userResultUtilitys.upsertUserResult, ans)
-        console.log(result)
+        const result1 = await this.$executer.executeWithExc(this.$userResultUtilitys.upsertUserResult, ans)
+        console.log(result1)
+        const result2 = await this.$executer.executeWithExc(this.$userResultUtilitys.insertFirstUserResult, ans)
+        console.log(result2)
         this.$router.push(`/user/result?question_id=${this.question_id}`)
       }catch(err){
         console.log(err)

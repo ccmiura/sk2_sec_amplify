@@ -172,6 +172,51 @@ export const listUserResults = /* GraphQL */ `
     }
   }
 `;
+export const getFirstUserResult = /* GraphQL */ `
+  query GetFirstUserResult($user_id: ID!, $question_id: ID!) {
+    getFirstUserResult(user_id: $user_id, question_id: $question_id) {
+      user_id
+      question_id
+      name
+      status
+      answers
+      correct_answers
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const listFirstUserResults = /* GraphQL */ `
+  query ListFirstUserResults(
+    $user_id: ID
+    $question_id: ModelIDKeyConditionInput
+    $filter: ModelFirstUserResultFilterInput
+    $limit: Int
+    $nextToken: String
+    $sortDirection: ModelSortDirection
+  ) {
+    listFirstUserResults(
+      user_id: $user_id
+      question_id: $question_id
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      sortDirection: $sortDirection
+    ) {
+      items {
+        user_id
+        question_id
+        name
+        status
+        answers
+        correct_answers
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
 export const listSortedQuestinsMaster = /* GraphQL */ `
   query ListSortedQuestinsMaster(
     $dummy: String
@@ -252,6 +297,35 @@ export const question_idIndexKey = /* GraphQL */ `
     $nextToken: String
   ) {
     question_idIndexKey(
+      question_id: $question_id
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        user_id
+        question_id
+        name
+        status
+        answers
+        correct_answers
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
+export const firstUserResult_question_idIndex = /* GraphQL */ `
+  query FirstUserResult_question_idIndex(
+    $question_id: ID
+    $sortDirection: ModelSortDirection
+    $filter: ModelFirstUserResultFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    firstUserResult_question_idIndex(
       question_id: $question_id
       sortDirection: $sortDirection
       filter: $filter

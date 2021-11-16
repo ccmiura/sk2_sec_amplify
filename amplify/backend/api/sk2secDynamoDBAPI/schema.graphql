@@ -38,3 +38,16 @@ type UserResult
   answers: [Int]
   correct_answers: Int
 }
+
+type FirstUserResult
+@model
+@key(fields: ["user_id", "question_id"])
+@key(name: "firstUserResult_question_idIndex", fields: ["question_id"], queryField: "firstUserResult_question_idIndex")
+{
+  user_id: ID!
+  question_id: ID!
+  name: String
+  status: String
+  answers: [Int]
+  correct_answers: Int
+}

@@ -226,3 +226,54 @@ export const deleteUserResult = /* GraphQL */ `
     }
   }
 `;
+export const createFirstUserResult = /* GraphQL */ `
+  mutation CreateFirstUserResult(
+    $input: CreateFirstUserResultInput!
+    $condition: ModelFirstUserResultConditionInput
+  ) {
+    createFirstUserResult(input: $input, condition: $condition) {
+      user_id
+      question_id
+      name
+      status
+      answers
+      correct_answers
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const updateFirstUserResult = /* GraphQL */ `
+  mutation UpdateFirstUserResult(
+    $input: UpdateFirstUserResultInput!
+    $condition: ModelFirstUserResultConditionInput
+  ) {
+    updateFirstUserResult(input: $input, condition: $condition) {
+      user_id
+      question_id
+      name
+      status
+      answers
+      correct_answers
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const deleteFirstUserResult = /* GraphQL */ `
+  mutation DeleteFirstUserResult(
+    $input: DeleteFirstUserResultInput!
+    $condition: ModelFirstUserResultConditionInput
+  ) {
+    deleteFirstUserResult(input: $input, condition: $condition) {
+      user_id
+      question_id
+      name
+      status
+      answers
+      correct_answers
+      createdAt
+      updatedAt
+    }
+  }
+`;
