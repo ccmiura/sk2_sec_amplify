@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goto(`/admin/user_management/update?user_id=${user.user_id}`)">ユーザー情報更新</v-btn>
+        <v-btn class="mr-3" @click.stop="goto(`/admin/user_management/update?user_id=${runUrlEncode(user.user_id)}`)">ユーザー情報更新</v-btn>
         <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
       </v-row>
     </v-col>
@@ -56,6 +56,5 @@ export default ({
       user: user,
     }
   }
-
 })
 </script>

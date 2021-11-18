@@ -29,7 +29,7 @@
               :key="item.user_id">
               <td>
                 <div v-if="item.status > 0">
-                  <nuxt-link :to="`/admin/questions_management/user_result?question_id=${item.question_id}&user_id=${item.user_id}`">{{item.name}}</nuxt-link>
+                  <nuxt-link :to="`/admin/questions_management/user_result?question_id=${item.question_id}&user_id=${runUrlEncode(item.user_id)}`">{{item.name}}</nuxt-link>
                 </div>
                 <div v-else>
                   {{item.name}}

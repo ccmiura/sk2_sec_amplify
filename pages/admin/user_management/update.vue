@@ -89,9 +89,10 @@ export default {
       name: rest.UserAttributes.find(e => e.Name === 'name').Value,
       email: rest.UserAttributes.find(e => e.Name === 'email').Value,
     }
+    const urlUser_id = encodeURIComponent(user.user_id)
     
     return {
-      home: `/admin/user_management/details?user_id=${user.user_id}`,
+      home: `/admin/user_management/details?user_id=${urlUser_id}`,
       user: user,
       email: user.email,
       userName: user.name

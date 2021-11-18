@@ -26,6 +26,9 @@ Vue.mixin(
       statusString(status){
         console.log(status, messages[status])
         return messages[status]
+      },
+      runUrlEncode(str){
+        return encodeURIComponent(str)
       }
     }
   }
