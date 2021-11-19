@@ -1,4 +1,4 @@
-export const state = ({
+export const state = () => ({
   message: "",
   type: "error",
 })
@@ -14,4 +14,13 @@ export const mutations = {
     state.type = type
   },
   clear: state => Object.assign(state, {message: "", type: "error"})
+}
+
+export const actions = {
+  putMessage( { commit }, message, type="error") {
+    commit('putMessage', message, type)
+  },
+  clear( { commit } ) {
+    commit('clear')
+  }
 }

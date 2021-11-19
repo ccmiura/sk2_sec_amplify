@@ -111,8 +111,8 @@ export default ({
         this.$router.push("/admin/user_management")
       }catch(err){
         console.log(err)
-        this.$store.commit("message/putMessage", err)
         this.$store.commit("progress/off")
+        this.$store.commit("message/putMessage", err.message)
         this.dialog = false
       }
     }

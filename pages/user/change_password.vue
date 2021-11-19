@@ -20,7 +20,7 @@
           パスワードの条件
           <ol>
             <li>パスワードの文字数制限: 8～128 文字</li>
-            <li>大文字、小文字、数字、! @ # $ % ^ & * ( ) _ + - = [ ] { } | ' 記号のうち、最低 3つの文字タイプの組み合わせ</li>
+            <li>大文字、小文字、数字、! @ # $ % ^ & * ( ) _ + - = [ ] { } | ' 記号の全ての文字タイプの組み合わせ</li>
             <li>AWSアカウント名またはEメールアドレスと同じでないこと</li>
           </ol>
         </v-alert>
@@ -133,9 +133,15 @@
 import { Auth } from 'aws-amplify'
 import { mapGetters  } from "vuex";
 const symbol = "!@#$%^&*()_+\\-=\\]\\[\\{\\}\\|\\.'";
-const regex = new RegExp(
- `^((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])|(?=.*[a-z])(?=.*[A-Z])(?=.*[${symbol}])|(?=.*[A-Z])(?=.*[0-9])(?=.*[${symbol}])|(?=.*[a-z])(?=.*[0-9])(?=.*[${symbol}]))[a-zA-Z0-9${symbol}]{8,128}$`);
 
+/*const regex = new RegExp(
+ `^((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])|
+ (?=.*[a-z])(?=.*[A-Z])(?=.*[${symbol}])|
+ (?=.*[A-Z])(?=.*[0-9])(?=.*[${symbol}])|
+ (?=.*[a-z])(?=.*[0-9])(?=.*[${symbol}]))[a-zA-Z0-9${symbol}]{8,128}$`);
+*/
+const regex = new RegExp(
+ `^((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[${symbol}]))[a-zA-Z0-9${symbol}]{8,128}$`);
 export default {
   data: () => ({
     alert: false,
@@ -180,7 +186,7 @@ export default {
       }catch(err){
         this.$store.commit("progress/off")
         console.log(err)
-        this.store.commit("message/putMessage", err)
+        this.$store.commit("message/putMessage", err.message)
       }
       
     }

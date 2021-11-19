@@ -1,4 +1,4 @@
-export const state = ({progress: false})
+export const state = () =>({progress: false})
 
 export const getters = {
   progress: state => {

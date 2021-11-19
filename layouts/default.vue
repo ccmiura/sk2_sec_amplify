@@ -35,6 +35,7 @@
 <script>
 import { Auth } from 'aws-amplify'
 import message from '../components/message.vue'
+import { mapActions } from 'vuex';
 export default {
   data: () => (
     {
@@ -73,7 +74,14 @@ export default {
     },
     setHader(title){
       this.title = title
-    }
+    },
+    ...mapActions({
+      clearMessage: "message/clear"
+    }),
+  },
+  updated(){
+    console.log("default.updated")
+    this.clearMessage()
   }
 }
 </script>
