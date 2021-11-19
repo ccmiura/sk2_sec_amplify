@@ -100,7 +100,10 @@ export default ({
         const listUserResult = await this.$userResultUtilitys.getListUserResult(this.user.user_id)
         console.log(listUserResult)
         listUserResult.forEach(async e=> {
-          await this.$userResultUtilitys.delUserResult(e.user_id, e.question_id)
+          let tmpList = []
+          tmpList.push(this.$userResultUtilitys.delUserResult(e.user_id, e.question_id))
+          tmpList.push(this.$userResultUtilitys.delFirstUserResult(e.user_id, e.question_id))
+          await Promise.all(tmpList)
         })
         const res = await this.$authUtilitys.deleteUser(this.user.user_id)
         console.log(res)
