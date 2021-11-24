@@ -1,9 +1,11 @@
 <template>
+  <amplify-auth-container>
     <amplify-authenticator>
       <amplify-sign-in slot="sign-in" :form-fields.prop="formFields">
         <div slot="secondary-footer-content"></div>
       </amplify-sign-in>
     </amplify-authenticator>
+  </amplify-auth-container>
 </template>
 <script>
 import { AuthState, onAuthUIStateChange } from '@aws-amplify/ui-components'
@@ -24,7 +26,7 @@ export default {
         type: 'password',
         label: 'パスワード*',
         placeholder: 'パスワードを入力',
-        inputProps: { required: true, autocomplete: 'password' },
+        inputProps: { required: true, autocomplete: 'current-password' },
         hint: null
       }
     ]
