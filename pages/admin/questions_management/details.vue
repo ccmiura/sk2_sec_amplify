@@ -52,7 +52,7 @@
               </tr>
               <tr>
                 <th class="period_border_style text-center">正解率</th>
-                <td class="period_border_style text-left">{{item.correctAnswerRate * 100}}%</td>
+                <td class="period_border_style text-left">{{Math.round(item.correctAnswerRate * 10000) / 100}}%</td>
               </tr>
 
               </template>

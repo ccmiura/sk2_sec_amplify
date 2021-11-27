@@ -95,7 +95,7 @@ export default {
   },
   methods:{
     dataSlice(page){
-      this.length = Math.floor(this.originData.length <= 5 ? 0: this.originData.length / this.limit) + 1
+      this.length = Math.floor(this.originData.length / this.limit) + ((this.originData.length % this.limit) > 0 ? 1: 0)
       let offset = (page > 0? page - 1: 0) * this.limit
       this.data = this.originData.slice(offset, (offset + this.limit))
     }
