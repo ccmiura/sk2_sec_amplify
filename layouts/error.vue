@@ -12,8 +12,9 @@
   </v-app>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent, reactive, useMeta, ref } from '@nuxtjs/composition-api'
+export default defineComponent({
   layout: 'empty',
   props: {
     error: {
@@ -21,20 +22,20 @@ export default {
       default: null
     }
   },
-  data () {
+  head:{},
+  setup: ({error}) =>{
+    const pageNotFound = ref('404 Not Found');
+    const otherError = ref('An error occurred');
+    const {title} = useMeta();
+    title.value =
+      error.statusCode === 404 ? pageNotFound.value : otherError.value
     return {
-      pageNotFound: '404 Not Found',
-      otherError: 'An error occurred'
-    }
-  },
-  head () {
-    const title =
-      this.error.statusCode === 404 ? this.pageNotFound : this.otherError
-    return {
-      title
+      title,
+      pageNotFound,
+      otherError,
     }
   }
-}
+})
 </script>
 
 <style scoped>

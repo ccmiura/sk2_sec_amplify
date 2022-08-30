@@ -6,11 +6,16 @@
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
-    "generate": "nuxt generate"
+    "generate": "nuxt generate",
+    "lint": "eslint --ext .ts,.js,.vue ."
   },
   "dependencies": {
-    "@aws-amplify/ui-vue": "1.1.20",
+    "@aws-amplify/ui-vue": "^1.1.20",
+    "@nuxt/typescript-runtime": "^2.1.0",
+    "@nuxtjs/composition-api": "^0.33.1",
     "aws-amplify": "^4.2.2",
+    "aws-amplify-vue": "^2.1.5",
+    "babel-plugin-transform-decorators": "^6.24.1",
     "core-js": "^3.15.1",
     "date-with-offset": "^1.0.1",
     "nuxt": "^2.15.7",
@@ -20,6 +25,12 @@
   },
   "devDependencies": {
     "@mdi/font": "^5.9.55",
-    "@nuxtjs/vuetify": "^1.12.1"
+    "@nuxt/types": "^2.15.8",
+    "@nuxt/typescript-build": "^2.1.0",
+    "@nuxtjs/eslint-config-typescript": "^10.0.0",
+    "@nuxtjs/vuetify": "^1.12.1",
+    "@types/papaparse": "@5.3.3",
+    "nuxt-typed-vuex": "^0.3.1",
+    "vuex-module-decorators": "^2.0.0"
   }
 }

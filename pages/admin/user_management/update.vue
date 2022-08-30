@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -15,13 +15,13 @@
             v-model="email"
             label="E-MAIL"
             required
-            :rules="[rules.required, rules.email]"
+            :rules="[data.rules.required, data.rules.email]"
           ></v-text-field>
         </v-row>
         <v-row>
           <v-text-field
             v-model="userName"
-            :rules="[rules.required]"
+            :rules="[data.rules.required]"
             label="名前"
             :count=255
             required
@@ -66,62 +66,83 @@
   </v-row>
   </v-container>
 </template>
-<script>
+<script lang="ts">
+import { defineComponent, ref, reactive, useAsync, useContext, useRoute, useStore, onMounted } from '@nuxtjs/composition-api'
+import { goPrevFactory } from '~/composables/helper'
+export default defineComponent({
+  setup(){
+    const route = useRoute()
+    const ctx:any = useContext()
+    console.log(ctx)
+    const store = useStore()
+    const valid = ref(false)
+    const dialog = ref(false)
+    const email = ref("")
+    const userName = ref("")
+    const data = reactive(
+      {
+        rules:{
+          required: (v:string) => !!v || '必須項目です。',
+          email: (v:string) => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(v) || 'emailの書式が正しくありません。'
+        },
+        user:{
+          user_id: "",
+          name: "",
+          email: "",
+        }
+      }
+    )
+    const user_id:string = route.value.query.user_id as string
+    const home = `/admin/user_management/details?user_id=${encodeURIComponent(user_id)}`
 
-export default {
-  data: () => ({
-    valid: false,
-    dialog: false,
-    email: "",
-    userName: "",
-    rules:{
-      required: v => !!v || '必須項目です。',
-      email: v => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(v) || 'emailの書式が正しくありません。'
-    },
-  }),
-  async asyncData({route, $authUtilitys}){
-    const user_id = route.query.user_id
-    const {...rest } =  await $authUtilitys.getUser(user_id);
-    
-    console.log(rest)
-    const user = {
-      user_id: rest.Username,
-      name: rest.UserAttributes.find(e => e.Name === 'name').Value,
-      email: rest.UserAttributes.find(e => e.Name === 'email').Value,
-    }
-    const urlUser_id = encodeURIComponent(user.user_id)
-    
-    return {
-      home: `/admin/user_management/details?user_id=${urlUser_id}`,
-      user: user,
-      email: user.email,
-      userName: user.name
-    }
-  },
-  mounted(){
-    console.log("/admin/user_management/add mounted")
-    console.log("valid", this.valid)
-  },
-  methods:{
-    async updateUser(){
-      console.log(this.email, this.userName, this.addUserPassword, this.confirmPassword, this.valid)
-      this.alert = false
-      if(this.email != this.user.email || this.userName != this.user.name){
+    useAsync(async () =>{
+      const {...rest } =  await ctx.$authUtilitys.getUser(user_id);
+      
+      console.log(rest)
+      const user = {
+        user_id: rest.Username,
+        name: rest.UserAttributes.find((e:any) => e.Name === 'name').Value,
+        email: rest.UserAttributes.find((e:any) => e.Name === 'email').Value,
+      }
+      data.user = user
+      email.value = user.email
+      userName.value = user.name
+
+    })
+    const updateUser = async () => {
+      console.log(email.value, userName.value, valid.value)
+      //this.alert = false
+      if(email.value != data.user.email || userName.value != data.user.name){
         try{
-          this.dialog = false
-          const result = await this.$executer.executeWithExc(this.$authUtilitys.updateUser, this.user.user_id, this.email, this.userName)
+          dialog.value = false
+          const result = await ctx.$executer.executeWithExc(ctx.$authUtilitys.updateUser, data.user.user_id, email.value, userName.value)
           //const result = await this.$authUtilitys.updateUser(this.user.user_id, this.email, this.userName)
           console.log(result)
-          this.$store.commit('userInfo/update', this.email, this.userName) 
+          store.commit('userInfo/update', {email:email.value, name:userName.value}) 
         }catch(err){
           console.log(err)
-          this.dialog = false
+          dialog.value = false
         }
       }else{
-        this.$store.commit('message/putMessage', "変更箇所がないため更新できません。", "warning") 
-        this.dialog = false
+        store.commit('message/putMessage', {message:"変更箇所がないため更新できません。", type:"warning"}) 
+        dialog.value = false
       }
     }
+    onMounted(() =>{
+      console.log("/admin/user_management/add mounted")
+      console.log("valid", valid.value)
+    })
+
+    return {
+      valid,
+      dialog,
+      email,
+      userName,
+      data,
+      home,
+      updateUser,
+      goPrev: goPrevFactory(home)
+    }
   }
-}
+})
 </script>

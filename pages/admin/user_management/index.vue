@@ -3,8 +3,8 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goto('/admin/user_management/add')">ユーザー追加</v-btn>
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="$router.push('/admin/user_management/add')">ユーザー追加</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -29,7 +29,7 @@
               :key="item.Username"
             >
               <td><nuxt-link :to="`/admin/user_management/details?user_id=${runUrlEncode(item.Username)}`">{{ item.name }}</nuxt-link></td>
-              <td><v-icon @click.stop="goto(`/admin/user_management/delete?user_id=${runUrlEncode(item.Username)}`)">mdi-delete</v-icon></td>
+              <td><v-icon @click.stop="$router.push(`/admin/user_management/delete?user_id=${runUrlEncode(item.Username)}`)">mdi-delete</v-icon></td>
             </tr>
           </tbody>
         </template>
@@ -52,36 +52,42 @@
   </v-row>
 </v-container>
 </template>
-<script>
-export default ({
-  data: () =>({
-    title: "ユーザー管理",
-    users: [],
-    page: 1,
-    length: 0,
-    limit: 5,
+<script lang="ts">
+import { defineComponent, ref, useAsync, useContext } from '@nuxtjs/composition-api'
+import { goPrevFactory, runUrlEncode, dataSliceFactory } from '~/composables/helper'
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    const title = ref("ユーザー管理")
+    const page = ref(1)
+    const length = ref(0)
+    const limit = ref(5)
     
-  }),
-  async asyncData({$authUtilitys}){
-    const rest =  await $authUtilitys.listUsersInGroup("user")
-    console.log("rest", rest)
-    const users = rest.Users.map((item) =>{
-      let name = item.Attributes.find(e => e.Name === 'name')
-      item['name'] = name.Value
-      return item
+    const users = ref([])
+    const originUsers = ref([])
+
+    const dataSlice = dataSliceFactory(originUsers, length, limit, users)
+
+    useAsync( async () => {
+      const rest = await ctx.$authUtilitys.listUsersInGroup("user")
+      originUsers.value = rest.Users.map((item:any) =>{
+        let name = item.Attributes.find((e:any) => e.Name === 'name')
+        item['name'] = name.Value
+        return item
+      })
+      dataSlice(page.value)
     })
+    
     return {
-      originUsers: users,
-    }
-  },
-  created(){
-    this.dataSlice(this.page)
-  },
-  methods:{
-    dataSlice(page){
-      this.length = Math.floor(this.originUsers.length / this.limit) + ((this.originUsers.length % this.limit) > 0 ? 1: 0)
-      let offset = (page > 0? page - 1: 0) * this.limit
-      this.users = this.originUsers.slice(offset, (offset + this.limit))
+      title,
+      users,
+      page,
+      length,
+      limit,
+      originUsers,
+      dataSlice,
+      goPrev: goPrevFactory(""),
+      runUrlEncode,
     }
   }
 })

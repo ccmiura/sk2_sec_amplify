@@ -4,17 +4,17 @@
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
         <v-btn class="mr-3" @click.stop="inputClick">CSVで追加</v-btn>
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
-      <v-form v-model="valid" ref="form">
+      <v-form v-model="valid" ref="addform">
         <v-row>
           <v-text-field
             v-model="email"
-            :rules="emailRules"
+            :rules="data.emailRules"
             label="E-MAIL"
             required
           ></v-text-field>
@@ -22,7 +22,7 @@
         <v-row>
           <v-text-field
             v-model="userName"
-            :rules="userNameRules"
+            :rules="data.userNameRules"
             label="名前"
             :count=255
             required
@@ -31,7 +31,7 @@
         <v-row>
           <v-text-field
             v-model="user_id"
-            :rules="userIdRules"
+            :rules="data.userIdRules"
             label="ユーザーID"
             :count=255
             hint="未入力の場合メールアドレスのユーザー名を自動で設定します。"
@@ -103,99 +103,119 @@
 
   
 </template>
-<script>
-import Papa from 'papaparse'
-export default {
-  data: () => ({
-    home: "/admin/user_management",
-    valid: false,
-    dialog: false,
-    csv: false,
-    email: "",
-    userName: "",
-    user_id: "",
-    addUserPassword: "",
-    confirmPassword: "",
-    uploadfile: [],
-    emailRules:[
-      v => !!v || 'Ｅメールは必須です。',
-      v => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(v) || 'emailの書式が正しくありません。'
-    ],
-    userNameRules: [v => !!v || '名前は必須です。'],
-    userIdRules:[
-      v => /^[a-zA-Z0-9_.+-]*/.test(v) || 'ユーザー名に使用できるのは半角英数と記号のみです。'
-    ],
-    show: false,
-    success: false,
-  }),
-  mounted(){
-    console.log("/admin/user_management/add mounted")
-    console.log("valid", this.valid)
-  },
-  methods:{
-    async callAddUser(){
-      this.dialog = false
-      try{
-        if(this.csv){
-          await this.multiAddUser()
-          this.csv = false
-        }else{
-          await this.singleAddUser()
+<script lang="ts">
+import {parse} from 'papaparse'
+import { defineComponent, ref, reactive, useContext } from '@nuxtjs/composition-api'
+import { goPrevFactory } from '~/composables/helper'
+export default defineComponent({
+  setup(props, setupContext){
+    const ctx:any = useContext()
+    // data
+    const home = "/admin/user_management"
+    const valid = ref(false)
+    const dialog = ref(false)
+    const csv = ref(false)
+    const email = ref("")
+    const userName = ref("")
+    const user_id = ref("")
+    const addUserPassword = ref("")
+    const confirmPassword = ref("")
+    const uploadfile = ref([])
+    const data = reactive({
+      emailRules:[
+        (v:string) => !!v || 'Ｅメールは必須です。',
+        (v:string) => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/.test(v) || 'emailの書式が正しくありません。'
+      ],
+      userNameRules: [(v:string) => !!v || '名前は必須です。'],
+      userIdRules:[
+        (v:string) => /^[a-zA-Z0-9_.+-]*/.test(v) || 'ユーザー名に使用できるのは半角英数と記号のみです。'
+      ],
+    })
+    const show = ref(false)
+    const success = ref(false)
+    const addform = ref<HTMLFormElement>()
+    const multiInput = ref<HTMLInputElement>()
+
+    // methods
+    const callAddUser = async () =>{
+      const addUser = async (email:string, user_id:string, userName:string) => {
+        console.log(email, userName, user_id)
+        if(user_id === ""){
+          user_id = email.split('@')[0]
         }
-        this.success = true
+        const result = await ctx.$executer.executeWithExc(ctx.$authUtilitys.addUser, email, user_id, userName)
+        console.log(result)
+      }
+      dialog.value = false
+      try{
+        if(csv.value){
+          uploadfile.value.forEach(async (element:any) => {
+            await addUser(element.email, element.user_id, element.userName)
+          })
+          csv.value = false
+        }else{
+          console.log(email.value, userName.value, user_id.value, valid.value)
+          await addUser(email.value, user_id.value, userName.value)
+        }
+        success.value = true
 
       }catch(err){
         console.log(err)
       }
-    },
-    async singleAddUser(){
-      console.log(this.email, this.userName, this.user_id, this.valid)
-      await this.addUser(this.email, this.user_id, this.userName)
-    },
-    async multiAddUser(){
-      this.uploadfile.forEach(async element => {
-        await this.addUser(element.email, element.user_id, element.userName)
-      })
-    },
-    async addUser(email, user_id, userName){
-      console.log(email, userName, user_id)
-      if(user_id === ""){
-        user_id = email.split('@')[0]
+    }
+    const selectedFile = async () =>{
+      const readFileAsync = (file:any) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => {
+            resolve(reader.result)
+          }
+          reader.onerror = reject
+          reader.readAsText(file)
+        })
       }
-      const result = await this.$executer.executeWithExc(this.$authUtilitys.addUser, email, user_id, userName)
-      console.log(result)
-    },
-    inputClick(){
-      this.$refs.multiInput.click();
-    },
-    async selectedFile() {
-      const file = this.$refs.multiInput.files[0]
+      const file = (multiInput.value?.files as FileList)[0]
       if (!file) {
         return;
       }
       try {
-        const content = await this.readFileAsync(file)
-        this.uploadfile = Papa.parse(content, {header: true, skipEmptyLines: true}).data
-        this.valid = true
-        this.csv = true
+        const content = await readFileAsync(file)
+        uploadfile.value = parse(content, {header: true, skipEmptyLines: true}).data
+        valid.value = true
+        csv.value = true
       } catch (e) {
         console.log(e)
       }
-    },
-    readFileAsync (file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => {
-          resolve(reader.result)
-        }
-        reader.onerror = reject
-        reader.readAsText(file)
-      })
-    },
-    clear(){
-      this.$refs.form.reset()
-      this.success = false
+    }
+    const inputClick = () =>{
+      multiInput.value?.click();
+    }
+
+    const clear = () => {
+      addform.value?.reset()
+      success.value = false
+    }
+    return {
+      valid,
+      dialog,
+      csv,
+      email,
+      userName,
+      user_id,
+      addUserPassword,
+      confirmPassword,
+      uploadfile,
+      data,
+      show,
+      success,
+      multiInput,
+      addform,
+      callAddUser,
+      selectedFile,
+      inputClick,
+      clear,
+      goPrev: goPrevFactory(home)
     }
   }
-}
+})
 </script>

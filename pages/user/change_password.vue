@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -119,7 +119,7 @@
           color="primary"
           text
           class="mx-auto"
-          @click.stop="goHome"
+          @click.stop="goPrev"
         >
           OK
         </v-btn>
@@ -129,9 +129,10 @@
 
   </v-container>
 </template>
-<script>
+<script lang="ts">
+import { defineComponent, ref, reactive, useContext, useStore, computed} from '@nuxtjs/composition-api'
 import { Auth } from 'aws-amplify'
-import { mapGetters  } from "vuex";
+import { goPrevFactory } from '~/composables/helper'
 const symbol = "!@#$%^&*()_+\\-=\\]\\[\\{\\}\\|\\.'";
 
 /*const regex = new RegExp(
@@ -142,55 +143,64 @@ const symbol = "!@#$%^&*()_+\\-=\\]\\[\\{\\}\\|\\.'";
 */
 const regex = new RegExp(
  `^((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[${symbol}]))[a-zA-Z0-9${symbol}]{8,128}$`);
-export default {
-  data: () => ({
-    alert: false,
-    type: "error",
-    message: "",
-    valid: false,
-    dialog: false,
-    progress: false,
-    change: false,
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-    rules: {
-      required: v => !!v || 'パスワードは必須です。',
-      minLength: v => v.length >= 8 || 'パスワードは8文字以上です',
-      stringKind: v => regex.test(v) || 'パスワードの形式が正しくありません。',
-    }
-  }),
-  
-  computed: {
-    ...mapGetters ({
-      userInfo: "userInfo/userInfo"
-    }),
-  },
-  mounted(){
-    console.log(this.userInfo)
-  },
-  methods:{
-    async changePassword(){
-      this.dialog = false
-      this.$store.commit("message/clear")
-      this.$store.commit("progress/on")
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    const store = useStore()
+    //data 
+    const alert = ref(false)
+    const type = ref("error")
+    const message = ref("")
+    const valid = ref(false)
+    const dialog = ref(false)
+    const progress = ref(false)
+    const change = ref(false)
+    const oldPassword = ref("")
+    const newPassword = ref("")
+    const confirmPassword = ref("")
+    const rules = reactive({
+      required: (v:string) => !!v || 'パスワードは必須です。',
+      minLength: (v:string) => v.length >= 8 || 'パスワードは8文字以上です',
+      stringKind: (v:string) => regex.test(v) || 'パスワードの形式が正しくありません。',
+    })
+    const userInfo = computed(() => {return store.getters["userInfo/userInfo"]})
+    const changePassword = async () =>{
+      dialog.value = false
+      store.commit("message/clear")
+      store.commit("progress/on")
       try{
         const user = await Auth.currentAuthenticatedUser() // ログイン中のユーザー情報
         await Auth.changePassword(
           user, 
-          this.oldPassword, // 現在のパスワード
-          this.newPassword  // 新しいパスワード
+          oldPassword.value, // 現在のパスワード
+          newPassword.value  // 新しいパスワード
         )
-        this.$store.commit("progress/off")
-        this.change = true
-      }catch(err){
-        this.$store.commit("progress/off")
+        store.commit("progress/off")
+        change.value = true
+      }catch(err:any){
+        store.commit("progress/off")
         console.log(err)
-        this.$store.commit("message/putMessage", err.message)
+        store.commit("message/putMessage", err.message)
       }
       
     }
+    return {
+      alert,
+      type,
+      message,
+      valid,
+      dialog,
+      progress,
+      change,
+      oldPassword,
+      newPassword,
+      confirmPassword,
+      rules,
+      userInfo,
+      changePassword,
+      goPrev: goPrevFactory("")
+    }
   }
-
-}
+  
+})
 </script>

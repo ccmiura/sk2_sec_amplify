@@ -3,8 +3,8 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goto(`/admin/questions_management/user_result_list?question_id=${question_id}`)">ユーザー成績一覧</v-btn>
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="$router.push(`/admin/questions_management/user_result_list?question_id=${question_id}`)">ユーザー成績一覧</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -80,44 +80,44 @@
   padding-left: 1rem;
 }
 </style>
-<script>
-import { API } from 'aws-amplify'
-import { firstUserResult_question_idIndex } from '~/src/graphql/queries'
+<script lang="ts">
+import { defineComponent, ref, useAsync, useContext, useRoute } from '@nuxtjs/composition-api'
+import { goPrevFactory} from '~/composables/helper'
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    const route = useRoute()
+    // data
+    const home = "/admin/questions_management"
+    const question_id = ref(route.value.query.question_id)
+    const questionsMaster = ref({title:"", questions:[]})
+    useAsync(async () => {
+      console.log("question_id", question_id.value)
+      let listAnswer:any[] = []
+      try{
+        let data = await ctx.$questionsUtilitys.getQuestion(question_id.value)
+        let results = await ctx.$userResultUtilitys.getFirstUserResult_question_idIndex(question_id.value)
+        const count = results.length
+        data?.questions?.items.forEach((d:any) => listAnswer.push([]))
+        results.forEach((result:any) => {
+          result.answers.forEach((a:any, i:number) => listAnswer[i].push(a))
+        })
 
-export default {
-  data: () => ({
-    home: "/admin/questions_management"
-  }),
-  async asyncData({route, $questionsUtilitys, $userResultUtilitys}){
-    const question_id = route.query.question_id
-    console.log("question_id", question_id)
-    let data = {}
-    let results = null
-    let listAnswer = []
-    try{
-      data = await $questionsUtilitys.getQuestion(question_id)
-      console.log(data)
-      results = await $userResultUtilitys.getFirstUserResult_question_idIndex(question_id)
-      console.log(results)
-      const count = results.length
-      data.questions.items.forEach(d => listAnswer.push([]))
-      results.forEach(result => {
-        result.answers.forEach((a, i) => listAnswer[i].push(a))
-      })
-      console.log(listAnswer)
-      data.questions.items.forEach((item, index) =>{
-        let tmp = listAnswer[index].filter(v => v === item.correct)
-        item["correctAnswerRate"] = count ? tmp.length / count : 0
-      })      
-    }catch(err){
-      console.log(err)
-    }
-    console.log(data)
+        data.questions.items.forEach((item:any, index:number) =>{
+          let tmp = listAnswer[index].filter((v:any) => v === item.correct)
+          item["correctAnswerRate"] = count ? tmp.length / count : 0
+        })
+        questionsMaster.value = data  
+      }catch(err){
+        console.log(err)
+      }
+    })
+
     return {
-      question_id: question_id,
-      questionsMaster: data
+      question_id,
+      questionsMaster,
+      goPrev: goPrevFactory(home),
     }
-
   }
-}
+})
 </script>

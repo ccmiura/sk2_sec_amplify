@@ -1,3 +1,4 @@
+/* tslint:disable */
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
@@ -12,16 +13,6 @@ export const createQuestionsMaster = /* GraphQL */ `
       participants
       taken
       questions {
-        items {
-          question_id
-          question_sub_id
-          question
-          ans
-          correct
-          comment
-          createdAt
-          updatedAt
-        }
         nextToken
       }
       dummy
@@ -41,16 +32,6 @@ export const updateQuestionsMaster = /* GraphQL */ `
       participants
       taken
       questions {
-        items {
-          question_id
-          question_sub_id
-          question
-          ans
-          correct
-          comment
-          createdAt
-          updatedAt
-        }
         nextToken
       }
       dummy
@@ -70,16 +51,6 @@ export const deleteQuestionsMaster = /* GraphQL */ `
       participants
       taken
       questions {
-        items {
-          question_id
-          question_sub_id
-          question
-          ans
-          correct
-          comment
-          createdAt
-          updatedAt
-        }
         nextToken
       }
       dummy
@@ -105,9 +76,6 @@ export const createQuestionsSubMaster = /* GraphQL */ `
         title
         participants
         taken
-        questions {
-          nextToken
-        }
         dummy
         createdAt
         updatedAt
@@ -134,9 +102,6 @@ export const updateQuestionsSubMaster = /* GraphQL */ `
         title
         participants
         taken
-        questions {
-          nextToken
-        }
         dummy
         createdAt
         updatedAt
@@ -163,9 +128,6 @@ export const deleteQuestionsSubMaster = /* GraphQL */ `
         title
         participants
         taken
-        questions {
-          nextToken
-        }
         dummy
         createdAt
         updatedAt

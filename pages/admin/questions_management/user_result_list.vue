@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -59,67 +59,83 @@
   </v-row>
   </v-container>
 </template>
-<script>
+<script lang="ts">
 import { API } from 'aws-amplify'
 import { question_idIndexKey } from '~/src/graphql/queries'
+import { defineComponent, ref, useAsync, useContext, useRoute } from '@nuxtjs/composition-api'
+import { statusString, goPrevFactory, runUrlEncode, dataSliceFactory } from '@/composables/helper'
+export default defineComponent({
+  head:{},
+  setup(){
+    const route = useRoute()
+    const ctx:any = useContext()
+    // data
+    const page = ref(1)
+    const length = ref(0)
+    const limit = ref(5)
+    const originalData = ref<any[]>([])
+    const data = ref<any[]>([])
+    const question_id = ref(route.value.query.question_id)
+    const questionsMaster = ref<any>({title:"", questions:[]})
+    const home = `/admin/questions_management/details?question_id=${question_id.value}`
 
-export default {
-  data: () => ({
+    const dataSlice = dataSliceFactory(originalData, length, limit, data)
+
+    useAsync(async () =>{
+      
+      console.log("question_id", question_id.value)
+      const promiseList = []
+      const tmpData:any[] = []
+      try{
+        promiseList.push(ctx.$questionsUtilitys.getQuestion(question_id.value))
+        promiseList.push(API.graphql({query: question_idIndexKey, variables: {question_id: question_id.value}}))
+        promiseList.push(ctx.$authUtilitys.listUsersInGroup("user"))
+
+        const result = await Promise.all(promiseList)
+        console.log(result)
+        questionsMaster.value = result[0]
+        
+        result[2].Users.forEach((element:any) => {
+          
+          let userResult = result[1].data.question_idIndexKey.items.find((e:any) => e.user_id === element.Username)
+          if(userResult == undefined || userResult == null){
+            userResult = {
+              name: element.Attributes.find((e:any) => e.Name === 'name').Value,
+              user_id: element.username,
+              correct_answers: 0,
+              status: 0,
+              updatedAt: "--"
+            }
+          }
+          tmpData.push(userResult)
+        })
+        originalData.value = tmpData
+        dataSlice(page.value)
+      }catch(err){
+        console.log(err)
+      }
+    })
+    return {
+      page,
+      length,
+      limit,
+      //home,
+      question_id,
+      questionsMaster,
+      originalData,
+      data,
+      dataSlice,
+      statusString,
+      goPrev: goPrevFactory(home),
+      runUrlEncode,
+    }
+  }
+  /*data: () => ({
     page: 1,
     length: 0,
     limit: 5,
     data: [],
 
-  }),
-  async asyncData({route, $authUtilitys, $questionsUtilitys}){
-    const question_id = route.query.question_id
-    console.log("question_id", question_id)
-    let data = []
-    let questionsMaster = null
-    const promiseList = []
-    try{
-      promiseList.push($questionsUtilitys.getQuestion(question_id))
-      promiseList.push(API.graphql({query: question_idIndexKey, variables: {question_id: question_id}}))
-      promiseList.push($authUtilitys.listUsersInGroup("user"))
-
-      const result = await Promise.all(promiseList)
-      console.log(result)
-      questionsMaster = result[0]
-      
-      result[2].Users.forEach(element => {
-        
-        let userResult = result[1].data.question_idIndexKey.items.find(e => e.user_id === element.Username)
-        if(userResult == undefined || userResult == null){
-          userResult = {
-            name: element.Attributes.find(e => e.Name === 'name').Value,
-            user_id: element.username,
-            correct_answers: 0,
-            status: 0,
-            updatedAt: "--"
-          }
-        }
-        data.push(userResult)
-      })
-    }catch(err){
-      console.log(err)
-    }
-    return {
-      home: `/admin/questions_management/details?question_id=${question_id}`,
-      question_id: question_id,
-      originalData: data,
-      questionsMaster: questionsMaster
-    }
-
-  },
-  created(){
-    this.dataSlice(this.page)
-  },
-  methods:{
-    dataSlice(page){
-      this.length = Math.floor(this.originalData.length / this.limit) + ((this.originalData.length % this.limit) > 0 ? 1: 0)
-      let offset = (page > 0? page - 1: 0) * this.limit
-      this.data = this.originalData.slice(offset, (offset + this.limit))
-    }
-  }
-}
+  }),*/
+})
 </script>

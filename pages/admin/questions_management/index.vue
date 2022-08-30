@@ -3,8 +3,8 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goto('/admin/questions_management/add')">問題追加</v-btn>
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="$router.push('/admin/questions_management/add')">問題追加</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -24,7 +24,7 @@
               :key="item.question_id">
               <td><nuxt-link :to="`/admin/questions_management/details?question_id=${item.question_id}`">{{item.title}}</nuxt-link></td>
               <td class="text-center" style="font-size: 8pt;white-space: nowrap;">{{item.createdAt.substr(0,10)}}</td>
-              <td class="text-center"><v-icon @click.stop="goto(`/admin/questions_management/delete?question_id=${item.question_id}`)">mdi-delete</v-icon></td>
+              <td class="text-center"><v-icon @click.stop="$router.push(`/admin/questions_management/delete?question_id=${item.question_id}`)">mdi-delete</v-icon></td>
             </tr>
           </tbody>
         </template>
@@ -46,38 +46,39 @@
   </v-row>
   </v-container>
 </template>
-<script>
+<script lang="ts">
+import { defineComponent, ref, useAsync, useContext } from '@nuxtjs/composition-api'
+import { goPrevFactory, dataSliceFactory } from '~/composables/helper'
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    // data
+    const questions = ref([])
+    const originData = ref([])
+    const page = ref(1)
+    const length = ref(0)
+    const limit = ref(5)
 
-export default {
-  data: () => ({
-    questions: [],
-    page: 1,
-    length: 0,
-    limit: 5,
-  }),
-  async asyncData({$questionsUtilitys}){
-    let tmp = []
-    try{
-      tmp = await $questionsUtilitys.getQuestionsMasterList()
-      console.log(tmp)
-    }catch(e){
-      console.log("error", e)
-      throw e
-    }
+    const dataSlice = dataSliceFactory(originData, length, limit, questions)
+    useAsync(async () =>{
+      try{
+        originData.value = await ctx.$questionsUtilitys.getQuestionsMasterList()
+        console.log(originData.value)
+        dataSlice(page.value)
+      }catch(e){
+        console.log("error", e)
+        throw e
+      }
+    })
+
     return {
-      originData: tmp
-    }
-
-  },
-  created(){
-    this.dataSlice(this.page)
-  },
-  methods:{
-    dataSlice(page){
-      this.length = Math.floor(this.originData.length / this.limit) + ((this.originData.length % this.limit) > 0 ? 1: 0)
-      let offset = (page > 0? page - 1: 0) * this.limit
-      this.questions = this.originData.slice(offset, (offset + this.limit))
+      questions,
+      page,
+      length,
+      limit,
+      dataSlice,
+      goPrev: goPrevFactory(""),
     }
   }
-}
+})
 </script>

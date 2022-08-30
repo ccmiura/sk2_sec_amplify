@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -51,33 +51,39 @@
   </v-row>
   </v-container>
 </template>
-<script>
-export default {
-  data: () => ({
-    home: "/admin/questions_management",
-    dialog: false,
-  }),
-  async asyncData({route, $questionsUtilitys}){
-    const question_id = route.query.question_id
-    console.log("question_id", question_id)
-    const data = await $questionsUtilitys.getQuestion(question_id)
-    return {
-      questionsMaster: data,
-      question_id: question_id
-    }
-  },
-  methods:{
-    async deleteData(){
-      console.log(this.question_id)
-      this.dialog = false
+<script lang="ts">
+import { defineComponent, ref, useAsync, useContext, useRoute, useRouter } from '@nuxtjs/composition-api'
+import { goPrevFactory } from '~/composables/helper'
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    const route = useRoute()
+    const router = useRouter()
+    // data
+    const home = "/admin/questions_management"
+    const dialog = ref(false)
+    const question_id = ref(route.value.query.question_id)
+    // console.log("question_id", question_id.value)
+    const questionsMaster = ref<any>({title:""})
+    useAsync(async () =>{
+      questionsMaster.value = await ctx.$questionsUtilitys.getQuestion(question_id.value)
+    })
+    const deleteData = async () => {
+      dialog.value = false
       try{
-        //await this.$questionsUtilitys.deleteQuestion(this.question_id)
-        await this.$executer.executeWithExc(this.$questionsUtilitys.deleteQuestion, this.question_id)
-        this.$router.push("/admin/questions_management")
+        await ctx.$executer.executeWithExc(ctx.$questionsUtilitys.deleteQuestion, question_id.value)
+        router.push("/admin/questions_management")
       }catch(err){
         console.log(err)
       }
     }
+    return {
+      dialog,
+      question_id,
+      questionsMaster,
+      deleteData,
+      goPrev: goPrevFactory(home)
+    }
   }
-}
+})
 </script>

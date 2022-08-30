@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click="goHome">ホームへ</v-btn>
+        <v-btn class="mr-3" @click="goPrev">ホームへ</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -105,62 +105,70 @@
   color: #D32F2F;
 }
 </style>
-<script>
+<script lang="ts">
+import { defineComponent, ref, useAsync, useContext, useRoute, useStore } from '@nuxtjs/composition-api'
 import { API } from 'aws-amplify'
 import { getUserResult } from '~/src/graphql/queries'
-
-export default {
-  async asyncData({route, store, $questionsUtilitys}){
-    const question_id = route.query.question_id
-    const user_id = store.getters['userInfo/userInfo'].user_id
-    console.log("question_id", question_id)
-    console.log("user_id", user_id)
-    let questionMaster = null
-    const data = []
-    let promise_list = []
-    let passFail = false
-    let point = 0
-    try{
-      promise_list.push($questionsUtilitys.getQuestion(question_id))
-      promise_list.push(API.graphql({query: getUserResult, variables: {question_id: question_id, user_id: user_id}}))
-      const res = await Promise.all(promise_list)
-      console.log(res)
+import { goPrevFactory } from '~/composables/helper'
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    const store = useStore()
+    const route = useRoute()
+    // data
+    const question_id = ref(route.value.query.question_id)
+    const questionsMaster = ref<any>({title:""})
+    const passFail = ref(false)
+    const data = ref<any>([])
+    const point = ref(0)
+    
+    useAsync(async ()=>{
+      const user_id = store.getters['userInfo/userInfo'].user_id
       
-      res[0].questions.items.forEach((e, i) => {
-        const tmp = Object.assign({}, e)
-        tmp["answer"] = res[1].data.getUserResult.answers[i]
-        tmp["rightWrong"] = false
-        tmp["style"] = "backgroundColor: #FFCDD2;"
-        if(tmp["answer"] === tmp["correct"]){
-          tmp["rightWrong"] = true
-          tmp["style"] = "backgroundColor: #E8F5E9;"
-          ++point
-        }
-        data.push(tmp)
-      });
-      questionMaster = res[0]
-      passFail = data.length === point
+      let promise_list = []
+      
+      try{
+        promise_list.push(ctx.$questionsUtilitys.getQuestion(question_id.value))
+        promise_list.push(API.graphql({query: getUserResult, variables: {question_id: question_id.value, user_id: user_id}}))
+        const res = await Promise.all(promise_list)
+        console.log(res)
+        
+        res[0].questions.items.forEach((e:any, i:number) => {
+          const tmp = Object.assign({}, e)
+          tmp["answer"] = res[1].data.getUserResult.answers[i]
+          tmp["rightWrong"] = false
+          tmp["style"] = "backgroundColor: #FFCDD2;"
+          if(tmp["answer"] === tmp["correct"]){
+            tmp["rightWrong"] = true
+            tmp["style"] = "backgroundColor: #E8F5E9;"
+            ++point.value
+          }
+          data.value.push(tmp)
+        });
+        questionsMaster.value = res[0]
+        passFail.value = data.value.length === point.value
 
-    }catch(err){
-      console.log(err)
-    }
-    return {
-      question_id: question_id,
-      questionsMaster: questionMaster,
-      passFail: passFail,
-      data: data,
-      point: point,
-    }
+      }catch(err){
+        console.log(err)
+      }
 
-  },
-  methods:{
-    getBgColor(ans, corr) {
+    })
+    const getBgColor = (ans:number, corr:number) => {
       if(ans === corr){
         return "backgroundColor: #E8F5E9;"
       }else{
         return "backgroundColor: #FFCDD2;"
       }
     }
+    return {
+      question_id,
+      questionsMaster,
+      passFail,
+      data,
+      point,
+      getBgColor,
+      goPrev: goPrevFactory("")
+    }
   }
-}
+})
 </script>

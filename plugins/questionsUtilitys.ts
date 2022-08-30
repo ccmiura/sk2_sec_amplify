@@ -1,12 +1,15 @@
+import { NuxtAppOptions, Plugin } from '@nuxt/types'
 import { API, graphqlOperation } from 'aws-amplify'
+import { GraphQLResult } from '@aws-amplify/api-graphql'
 import { createQuestionsMaster, createQuestionsSubMaster, deleteQuestionsMaster, deleteQuestionsSubMaster } from '~/src/graphql/mutations'
 import { listSortedQuestinsMaster, getQuestionsMaster } from '~/src/graphql/queries'
+import { CreateQuestionsMasterInput, CreateQuestionsSubMasterInput, ListSortedQuestinsMasterQuery, GetQuestionsMasterQuery } from '@/src/API'
 import DateWithOffset from "date-with-offset"
 
-function createQuestionsMasterData(uuid, title){
+function createQuestionsMasterData(question_id:string, title:string):CreateQuestionsMasterInput{
   const jdt = new DateWithOffset(540)
   return {
-    question_id: uuid,
+    question_id: question_id,
     dummy: "dummy",
     title: title,
     participants: 1,
@@ -14,9 +17,9 @@ function createQuestionsMasterData(uuid, title){
     createdAt: jdt.toISOString()
   }
 }
-function createQuestionsSubMasterData(uuid, data){
-  const result = []
-  data.forEach((element, index) => {
+function createQuestionsSubMasterData(uuid:string, data:any):CreateQuestionsSubMasterInput[]{
+  const result:CreateQuestionsSubMasterInput[] = []
+  data.forEach((element:any, index:number) => {
     let ans = []
     if(element.ans_1 != ""){
       ans.push(element.ans_1)
@@ -43,35 +46,35 @@ function createQuestionsSubMasterData(uuid, data){
   });
   return result
 }
-async function insertQuestionsMaster(data){
+async function insertQuestionsMaster(data:CreateQuestionsMasterInput){
   const res = await API.graphql({query: createQuestionsMaster, variables: {input: data}})
   return res
 }
 
 
-async function batchInsertQuestionSubMaster(data){
+async function batchInsertQuestionSubMaster(data: CreateQuestionsSubMasterInput[]){
   console.log(data)
-  const result = await Promise.all(data.map((v)=>{
+  const result = await Promise.all(data.map((v:any)=>{
       const res = API.graphql({query: createQuestionsSubMaster, variables: {input: v}})
-      return res
+      return res as PromiseLike<GraphQLResult<any>>
   }))
 
   console.log(result)    // ["OK", "OK", "OK"]
   return result
 }
 
-async function insertOp(uuid, title, data){
-  const master = createQuestionsMasterData(uuid, title)
-  const sub = createQuestionsSubMasterData(uuid, data)
+async function insertOp(question_id:string, title:string, data:any){
+  const master = createQuestionsMasterData(question_id, title)
+  const sub = createQuestionsSubMasterData(question_id, data)
   console.log(master, sub)
   try{
     const m_res = await insertQuestionsMaster(master)
     const s_res = await batchInsertQuestionSubMaster(sub)
-    return (m_res, s_res)
+    return [m_res, s_res]
   }catch(err){
     console.log(err)
     try{
-      await deleteQuestion(quesion_id)
+      await deleteQuestion(question_id)
     }catch(err2){
       console.log(err2)
     }finally{
@@ -79,11 +82,16 @@ async function insertOp(uuid, title, data){
     }
   }
 }
-async function query(token){
-  const {data: { listSortedQuestinsMaster: { items }}, nextToken} = 
-    await API.graphql(graphqlOperation(listSortedQuestinsMaster, {nextToken: token, dummy: "dummy", sortDirection: "DESC"}))
+async function query(token: string|null):Promise<any>{
+  //const {data: { listSortedQuestinsMaster: { items }}, nextToken} = 
+  const tmp =
+    await API.graphql(graphqlOperation(listSortedQuestinsMaster, {nextToken: token, dummy: "dummy", sortDirection: "DESC"})) as GraphQLResult<ListSortedQuestinsMasterQuery>
+  const items = tmp.data?.listSortedQuestinsMaster?.items
+  const nextToken = tmp.data?.listSortedQuestinsMaster?.nextToken
+
   if(nextToken != undefined){
-    items.concat(await query(nextToken))
+    const tmp2 = await query(nextToken)
+    items?.concat(tmp2)
   }
   return items
 }
@@ -99,17 +107,20 @@ async function getQuestionsMasterList(){
   }
   return tmp
 }
-async function getQuestion(question_id){
-  const rest = await API.graphql(graphqlOperation(getQuestionsMaster, {question_id: question_id, sortDirection: "ASC"}))
+async function getQuestion(question_id:string): Promise<any>{
+  const rest = await API.graphql(graphqlOperation(getQuestionsMaster, {question_id: question_id, sortDirection: "ASC"})) as GraphQLResult<GetQuestionsMasterQuery>
+  console.log("getQuestion",rest)
+  return rest.data!.getQuestionsMaster
+  
   //rest.data.getQuestionsMaster.questions.items.sort((a, b) => a.question_sub_id - b.question_sub_id)
-  return rest.data.getQuestionsMaster
+  
 }
 
-async function deleteQuestion(question_id){
+async function deleteQuestion(question_id: string){
   const data = await getQuestion(question_id)
-  const promiseList = []
+  const promiseList:Promise<GraphQLResult<any>>[] = []
   promiseList.push(API.graphql(graphqlOperation(deleteQuestionsMaster, {input: {question_id: question_id}})))
-  promiseList.concat(data.questions.items.map((v)=>{
+  promiseList.concat(data.questions.items.map((v:any)=>{
     const res = API.graphql(graphqlOperation(deleteQuestionsSubMaster, {input: {
       question_id: v.question_id, 
       question_sub_id: v.question_sub_id
@@ -119,7 +130,7 @@ async function deleteQuestion(question_id){
   const result = await Promise.all(promiseList)
 }
 
-export default ({ app }, inject) => {
+const questionsUtilitys:Plugin = (context, inject) => {
   // Vue、コンテキスト、ストアに$hello(msg）を挿入します。
   inject('questionsUtilitys', 
     {
@@ -130,3 +141,4 @@ export default ({ app }, inject) => {
     }
   )
 }
+export default questionsUtilitys

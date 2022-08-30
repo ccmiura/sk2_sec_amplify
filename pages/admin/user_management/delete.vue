@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -67,56 +67,69 @@
   </v-row>
   </v-container>
 </template>
-<script>
-export default ({
-  data: () => ({
-    home: "/admin/user_management",
-    dialog: false,
-    progress: false,
-    user: {}
-  }),
-  async asyncData({route, $authUtilitys}){
-    const user_id = route.query.user_id
-    const {...rest } =  await $authUtilitys.getUser(user_id);
-    
-    console.log(rest)
-    const user = {
-      user_id: rest.Username,
-      name: rest.UserAttributes.find(e => e.Name === 'name').Value,
-      email: rest.UserAttributes.find(e => e.Name === 'email').Value,
-    }
-    
-    return {
-      user: user,
-    }
-  },
-  methods:{
-    async deleteUser(){
-      try{
-        this.dialog = false
-        this.$store.commit("message/clear")
-        this.$store.commit("progress/on")
+<script lang="ts">
+import { defineComponent, ref, reactive, useAsync, useContext, useRoute, useRouter, useStore } from '@nuxtjs/composition-api'
+import { goPrevFactory } from '~/composables/helper'
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    const route = useRoute()
+    const router = useRouter()
+    const store = useStore()
+    // data
+    const home = "/admin/user_management"
+    const dialog = ref(false)
+    const progress = ref(false)
+    const user = reactive({
+      user_id: "",
+      name: "",
+      email: "",
+    })
 
-        const listUserResult = await this.$userResultUtilitys.getListUserResult(this.user.user_id)
+    useAsync(async () =>{
+      const user_id = route.value.query.user_id
+      const {...rest } =  await ctx.$authUtilitys.getUser(user_id);
+      
+      console.log(rest)
+      
+      user.user_id = rest.Username
+      user.name = rest.UserAttributes.find((e:any) => e.Name === 'name').Value
+      user.email = rest.UserAttributes.find((e:any) => e.Name === 'email').Value
+    })
+    const deleteUser = async () => {
+      try{
+        dialog.value = false
+        store.commit("message/clear")
+        store.commit("progress/on")
+
+        const listUserResult = await ctx.$userResultUtilitys.getListUserResult(user.user_id)
         console.log(listUserResult)
-        listUserResult.forEach(async e=> {
+        listUserResult.forEach(async (e:any)=> {
           let tmpList = []
-          tmpList.push(this.$userResultUtilitys.delUserResult(e.user_id, e.question_id))
-          tmpList.push(this.$userResultUtilitys.delFirstUserResult(e.user_id, e.question_id))
+          tmpList.push(ctx.$userResultUtilitys.delUserResult(e.user_id, e.question_id))
+          tmpList.push(ctx.$userResultUtilitys.delFirstUserResult(e.user_id, e.question_id))
           await Promise.all(tmpList)
         })
-        const res = await this.$authUtilitys.deleteUser(this.user.user_id)
+        const res = await ctx.$authUtilitys.deleteUser(user.user_id)
         console.log(res)
-        this.$store.commit("progress/off")
-        this.$router.push("/admin/user_management")
-      }catch(err){
+        store.commit("progress/off")
+        router.push("/admin/user_management")
+      }catch(err:any){
         console.log(err)
-        this.$store.commit("progress/off")
-        this.$store.commit("message/putMessage", err.message)
-        this.dialog = false
+        store.commit("progress/off")
+        store.commit("message/putMessage", {message:err.message, type:"error"})
+        dialog.value = false
       }
     }
-  }
+    return {
+      home,
+      dialog,
+      progress,
+      user,
+      deleteUser,
+      goPrev: goPrevFactory(home)
+    }
 
+  }
 })
 </script>

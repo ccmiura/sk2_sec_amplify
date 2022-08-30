@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -98,67 +98,75 @@
   border-bottom: 3px double rgba(0, 0, 0, 0.12) !important; 
 }
 </style>
-<script>
-export default {
-  data: () => ({
-    radioGroup: [],
-    dialog: false,
-    valid: false,
-  }),
-  watch: {
-    radioGroup: function (val) {
-      console.log(val, val.length, this.valid)
-      this.valid = this.questionsMaster.questions.items.length === val.length
-    }
-  },
-  async asyncData({store, route, $questionsUtilitys, $userResultUtilitys}){
-    const question_id = route.query.question_id
-    console.log("question_id", question_id)
-    let data = null
-    try{
-      data = await $questionsUtilitys.getQuestion(question_id)
-      console.log(data)
-    }catch(err){
-      console.log(err)
-    }
-    return {
-      question_id: question_id,
-      questionsMaster: data
-    }
+<script lang="ts">
+import { defineComponent, ref, useAsync, useContext, useRoute, useRouter, useStore, watch } from '@nuxtjs/composition-api'
+import { goPrevFactory } from '~/composables/helper'
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    const route = useRoute()
+    const router = useRouter()
+    const store = useStore()
+    // data
+    const radioGroup = ref([])
+    const dialog = ref(false)
+    const valid = ref(false)
+    const question_id = ref(route.value.query.question_id)
+    const questionsMaster = ref<any>({title:"", questions: []})
 
-  },
-  methods:{
-    async ans(){
-      this.dialog = false
-      let correctAnswers = 0
-      this.radioGroup.forEach((e, index)=>{
-        if(this.questionsMaster.questions.items[index].correct === parseInt(e)){
-          correctAnswers++
-        }
-      })
-      let userInfo = this.$store.getters['userInfo/userInfo']
-      let ans = {
-        question_id: this.question_id,
-        user_id: userInfo.user_id,
-        name: userInfo.name,
-        answers: this.radioGroup,
-        correct_answers: correctAnswers,
-        status: correctAnswers === this.questionsMaster.questions.items.length? 2 : 1
-      }
-      console.log(ans)
-      try {
-        //const result = await this.$userResultUtilitys.upsertUserResult(ans)
-        const result1 = await this.$executer.executeWithExc(this.$userResultUtilitys.upsertUserResult, ans)
-        console.log(result1)
-        const result2 = await this.$executer.executeWithExc(this.$userResultUtilitys.insertFirstUserResult, ans)
-        console.log(result2)
-        this.$router.push(`/user/result?question_id=${this.question_id}`)
+    watch(radioGroup, (val:string[]) => {
+      console.log(val, val.length, valid.value)
+      valid.value = questionsMaster.value.questions.items.length === val.length
+    },  { deep: true},)
+
+    useAsync(async () => {
+      try{
+        questionsMaster.value = await ctx.$questionsUtilitys.getQuestion(question_id.value)
+        console.log(questionsMaster.value)
       }catch(err){
         console.log(err)
       }
-      
+    })
+    const ans = async () =>{
+      dialog.value = false
+      let correctAnswers = 0
+      radioGroup.value.forEach((e:any, index:number)=>{
+        if(questionsMaster.value.questions.items[index].correct === parseInt(e)){
+          correctAnswers++
+        }
+      })
+      let userInfo = store.getters['userInfo/userInfo']
+      let tmpAns = {
+        question_id: question_id.value,
+        user_id: userInfo.user_id,
+        name: userInfo.name,
+        answers: radioGroup.value,
+        correct_answers: correctAnswers,
+        status: correctAnswers === questionsMaster.value.questions.items.length? 2 : 1
+      }
+      //console.log(tmpAns)
+      try {
+        //const result = await this.$userResultUtilitys.upsertUserResult(ans)
+        const result1 = await ctx.$executer.executeWithExc(ctx.$userResultUtilitys.upsertUserResult, tmpAns)
+        //console.log(result1)
+        const result2 = await ctx.$executer.executeWithExc(ctx.$userResultUtilitys.insertFirstUserResult, tmpAns)
+        //console.log(result2)
+        router.push(`/user/result?question_id=${question_id.value}`)
+      }catch(err){
+        console.log(err)
+      }
+    }
 
+    return {
+      radioGroup,
+      dialog,
+      valid,
+      question_id,
+      questionsMaster,
+      ans,
+      goPrev: goPrevFactory("")
     }
   }
-}
+
+})
 </script>

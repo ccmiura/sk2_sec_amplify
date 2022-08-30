@@ -1,8 +1,10 @@
 import { Auth, API } from 'aws-amplify'
-async function getUser(username){
-  let apiName = 'AdminQueries';
-  let path = '/getUser';
-  let myInit = { 
+import { NuxtAppOptions, Plugin } from '@nuxt/types'
+
+async function getUser(username: string): Promise<any>{
+  let apiName:string = 'AdminQueries';
+  let path:string = '/getUser';
+  let myInit:Object = { 
       queryStringParameters: {
         "username": username
       },
@@ -16,10 +18,10 @@ async function getUser(username){
   return rest
 }
 
-async function listUsersInGroup(group, nextToken=undefined, limit=60){
-  let apiName = 'AdminQueries';
-  let path = '/listUsersInGroup';
-  let myInit = { 
+async function listUsersInGroup(group: string, nextToken=undefined, limit=60): Promise<any>{
+  let apiName:string = 'AdminQueries';
+  let path:string = '/listUsersInGroup';
+  let myInit:Object = { 
       queryStringParameters: {
         "groupname": group,
         "limit": limit,
@@ -30,15 +32,15 @@ async function listUsersInGroup(group, nextToken=undefined, limit=60){
         Authorization: `${(await Auth.currentSession()).getAccessToken().getJwtToken()}`
       }
   }
-  console.log(myInit)
+  //console.log(myInit)
   const {NextToken, ...rest} =  await API.get(apiName, path, myInit);
   if(NextToken != undefined){
-    rest.concat(await listUsersInGroupCore(roup, NextToken, limit))
+    rest.concat(await listUsersInGroup(group, NextToken, limit))
   }
   return rest
 }
 
-async function addUser(email, user_id, name){
+async function addUser(email:string, user_id:string, name:string){
   let apiName = 'AdminQueries';
   
 
@@ -70,10 +72,10 @@ async function addUser(email, user_id, name){
   let result1 = await API.post(apiName, '/createUser', myInit1);
   let result2 = await API.post(apiName, '/addUserToGroup', myInit2);
 
-  return (result1,result2)
+  //return (result1, result2)
 }
 
-async function updateUser(username, email, name){
+async function updateUser(username:string, email:string, name:string){
   let apiName = 'AdminQueries';
   let path = '/updateUser';
   let myInit = { 
@@ -96,7 +98,7 @@ async function updateUser(username, email, name){
 }
 
 
-async function deleteUser(username){
+async function deleteUser(username:string){
   let apiName = 'AdminQueries';
   let path = '/deleteUser';
   let myInit = { 
@@ -113,7 +115,7 @@ async function deleteUser(username){
   return result
 }
 
-export default ({ app }, inject) => {
+const authUtiltys:Plugin = (context, inject) => {
   // Vue、コンテキスト、ストアに$hello(msg）を挿入します。
   inject('authUtilitys', {getUser: getUser,
     listUsersInGroup: listUsersInGroup,
@@ -122,3 +124,4 @@ export default ({ app }, inject) => {
     updateUser: updateUser,
   })
 }
+export default authUtiltys

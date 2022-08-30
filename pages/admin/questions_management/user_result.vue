@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goHome">戻る</v-btn>
+        <v-btn class="mr-3" @click.stop="goPrev">戻る</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -95,47 +95,57 @@
 }
 </style>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, useAsync, useContext, useRoute } from '@nuxtjs/composition-api'
 import { API } from 'aws-amplify'
 import { getQuestionsMaster, getUserResult, getFirstUserResult } from '~/src/graphql/queries'
+import {GetQuestionsMasterQuery} from '@/src/API'
+import { goPrevFactory } from '~/composables/helper'
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    const route = useRoute()
+    const question_id = ref(route.value.query.question_id)
+    const user_id = ref(route.value.query.user_id)
+    const home = `/admin/questions_management/user_result_list?question_id=${question_id.value}`
+    const data = ref([] as any[])
+    const questionsMaster = ref<any>({title:""})
 
-export default {
-  async asyncData({route, $questionsUtilitys}){
-    const question_id = route.query.question_id
-    const user_id = route.query.user_id
-    console.log("question_id", question_id)
-    console.log("user_id", user_id)
-    let userResult = null
-    let questionsMaster = null
-    let firstUserResult = null
-    const promis_list = []
-    try{
-      promis_list.push($questionsUtilitys.getQuestion(question_id))
-      promis_list.push(API.graphql({query: getUserResult, variables: {user_id: user_id, question_id: question_id}}))
-      promis_list.push(API.graphql({query: getFirstUserResult, variables: {user_id: user_id, question_id: question_id}}))
-      const result = await Promise.all(promis_list)
-      console.log(result)
-      questionsMaster = result[0]
-      userResult = result[1].data.getUserResult
-      firstUserResult = result[2].data.getFirstUserResult
-      console.log(userResult, firstUserResult)
-    }catch(err){
-      console.log(err)
-    }
-    const data = []
-    questionsMaster.questions.items.forEach((e, index) => {
-      const temp = Object.assign({}, e)
-      temp["answer"] = userResult.answers[index]
-      temp["firstAnswer"] = firstUserResult.answers[index]
-      data.push(temp)
+    useAsync(async () => {
+      let userResult:any = null
+      let firstUserResult:any = null
+      const promis_list = []
+      try{
+        promis_list.push(ctx.$questionsUtilitys.getQuestion(question_id.value))
+        promis_list.push(API.graphql({query: getUserResult, variables: {user_id: user_id.value, question_id: question_id.value}}))
+        promis_list.push(API.graphql({query: getFirstUserResult, variables: {user_id: user_id.value, question_id: question_id.value}}))
+        const result = await Promise.all(promis_list)
+        console.log(result)
+        questionsMaster.value = result[0] as GetQuestionsMasterQuery
+        userResult = result[1].data.getUserResult
+        firstUserResult = result[2].data.getFirstUserResult
+        console.log(userResult, firstUserResult)
+        questionsMaster.value.questions.items.forEach((e:any, index:number) => {
+          const temp = Object.assign({}, e)
+          temp["answer"] = userResult.answers[index]
+          temp["firstAnswer"] = firstUserResult.answers[index]
+          data.value.push(temp)
+        })
+      }catch(err){
+        console.log(err)
+      }
+
     })
+    console.log(questionsMaster.value)
     return {
-      home: `/admin/questions_management/user_result_list?question_id=${question_id}`,
-      data: data,
-      questionsMaster: questionsMaster,
-      question_id: question_id
+      question_id,
+      user_id,
+      home,
+      data,
+      questionsMaster,
+      goPrev: goPrevFactory(home)
     }
 
   }
-}
+})
 </script>

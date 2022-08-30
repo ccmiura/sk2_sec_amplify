@@ -1,3 +1,4 @@
+/* tslint:disable */
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
@@ -47,9 +48,6 @@ export const listQuestionsMasters = /* GraphQL */ `
         title
         participants
         taken
-        questions {
-          nextToken
-        }
         dummy
         createdAt
         updatedAt
@@ -75,9 +73,6 @@ export const getQuestionsSubMaster = /* GraphQL */ `
         title
         participants
         taken
-        questions {
-          nextToken
-        }
         dummy
         createdAt
         updatedAt
@@ -239,9 +234,6 @@ export const listSortedQuestinsMaster = /* GraphQL */ `
         title
         participants
         taken
-        questions {
-          nextToken
-        }
         dummy
         createdAt
         updatedAt

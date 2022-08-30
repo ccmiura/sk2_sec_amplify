@@ -1,6 +1,7 @@
 import { Auth } from 'aws-amplify'
+import { Middleware, NuxtAppOptions } from '@nuxt/types'
 
-async function signOut(redirect){
+const signOut = async (redirect:any) =>{
   try {
     await Auth.signOut();
     redirect("/signin")
@@ -8,13 +9,12 @@ async function signOut(redirect){
     console.log(error);
   }
 }
-
-export default async ({ redirect, route, store }) => {
+const checkRoute:Middleware = async ({ app, route, redirect }: NuxtAppOptions) => {
   console.log("routeCheck", route.path)
   const userInfo = await Auth.currentUserInfo()
   if (route.path != "/signin" && userInfo){
     //console.log(store)
-    const userInfo = store.getters['userInfo/userInfo']
+    const userInfo = app.store.getters['userInfo/userInfo']
     //console.log(userInfo)
     if(!Object.keys(userInfo).length){
       console.log("no user info.")
@@ -31,3 +31,4 @@ export default async ({ redirect, route, store }) => {
     }
   }
 }
+export default checkRoute

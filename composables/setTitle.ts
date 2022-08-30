@@ -1,4 +1,8 @@
-const title_map = {
+import { useRoute, useMeta } from '@nuxtjs/composition-api'
+interface TitleMap {
+  [index: string]: string
+}
+const title_map:TitleMap = {
   "/admin": "管理者ポータル",
   "/admin/user_management": "ユーザー管理",
   "/admin/user_management/add": "ユーザー追加",
@@ -16,11 +20,15 @@ const title_map = {
   "/user/result": "結果＆解説",
   "/user/change_password": "パスワード変更",
 }
-export default ({route, store}) => {
-  console.log("middleware title", route.path)
-  let tmp_title = "default"
-  if(route.path in title_map){
-    tmp_title = title_map[route.path]
+export function setTitleName(){
+  const route = useRoute()
+  const {title} = useMeta()
+  console.log("middleware title", route.value.path)
+  
+  let tmpTitle: string = "default"
+  if(route.value.path in title_map){
+    tmpTitle = title_map[route.value.path]
   }
-  store.commit('title/put', tmp_title)
+  title.value = tmpTitle
 }
+

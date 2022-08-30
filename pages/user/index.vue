@@ -3,7 +3,7 @@
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-row justify="end">
-        <v-btn class="mr-3" @click.stop="goto('/user/change_password')">パスワード変更</v-btn>
+        <v-btn class="mr-3" @click.stop="$router.push('/user/change_password')">パスワード変更</v-btn>
       </v-row>
     </v-col>
   </v-row>
@@ -49,56 +49,60 @@
   </v-row>
   </v-container>
 </template>
-<script>
+<script lang="ts">
+import { defineComponent, ref, useAsync, useContext, useStore } from '@nuxtjs/composition-api'
 import { API, graphqlOperation } from 'aws-amplify'
 import { listUserResults} from '~/src/graphql/queries'
+import { statusString, goPrevFactory, dataSliceFactory } from '@/composables/helper'
+export default defineComponent({
+  setup(){
+    const ctx:any = useContext()
+    const store = useStore()
+    // data
+    const questions = ref([])
+    const page = ref(1)
+    const length = ref(0)
+    const limit = ref(5)
+    const data = ref<any>([])
+    const originData = ref<any>([])
 
-export default {
-  data: () => ({
-    questions: [],
-    page: 1,
-    length: 0,
-    limit: 5,
-    data: [],
-  }),
-  async asyncData({store, $questionsUtilitys}){
-    let tmp = []
-    const promiseList = []
-    const userInfo = store.getters['userInfo/userInfo']
-    try{
-      promiseList.push($questionsUtilitys.getQuestionsMasterList())
-      promiseList.push(API.graphql(graphqlOperation(listUserResults,{user_id: userInfo.user_id})))
-      const result = await Promise.all(promiseList)
-      console.log(result)
-      result[0].forEach(element => {
-        const userResult = result[1].data.listUserResults.items.find(e => e.question_id === element.question_id)
-        if(userResult){
-          element["status"] = userResult.status
-          element["resultUpdatedAt"] = userResult.updatedAt
-        }else{
-          element["status"] = 0
-          element["resultUpdatedAt"] = "--"
-        }
-        tmp.push(element)
-      });
-      
-    }catch(e){
-      console.log("error", e)
-    }
+    const dataSlice = dataSliceFactory(originData, length, limit, data)
+    useAsync(async ()=>{
+      let tmp:any[] = []
+      const promiseList = []
+      const userInfo = store.getters['userInfo/userInfo']
+      try{
+        promiseList.push(ctx.$questionsUtilitys.getQuestionsMasterList())
+        promiseList.push(API.graphql(graphqlOperation(listUserResults,{user_id: userInfo.user_id})))
+        const result = await Promise.all(promiseList)
+        console.log(result)
+        result[0].forEach((element:any) => {
+          const userResult = result[1].data.listUserResults.items.find((e:any) => e.question_id === element.question_id)
+          if(userResult){
+            element["status"] = userResult.status
+            element["resultUpdatedAt"] = userResult.updatedAt
+          }else{
+            element["status"] = 0
+            element["resultUpdatedAt"] = "--"
+          }
+          tmp.push(element)
+        });
+        originData.value = tmp
+        dataSlice(page.value)
+      }catch(e){
+        console.log("error", e)
+      }
+    })
     return {
-      originData: tmp
-    }
-
-  },
-  created(){
-    this.dataSlice(this.page)
-  },
-  methods:{
-    dataSlice(page){
-      this.length = Math.floor(this.originData.length / this.limit) + ((this.originData.length % this.limit) > 0 ? 1: 0)
-      let offset = (page > 0? page - 1: 0) * this.limit
-      this.data = this.originData.slice(offset, (offset + this.limit))
+      questions,
+      page,
+      length,
+      limit,
+      data,
+      dataSlice,
+      statusString,
+      goPrev: goPrevFactory(""),
     }
   }
-}
+})
 </script>

@@ -1,5 +1,6 @@
 <template>
 <v-container>
+  <common-header/>
   <v-row justify="center">
     <v-col cols="12" sm="8" md="8" lg="8" xl="8">
       <v-card tile>
@@ -20,9 +21,4 @@
   </v-row>
 </v-container>
 </template>
-<script>
-export default {
 
-
-}
-</script>

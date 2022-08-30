@@ -1,5 +1,8 @@
 <template>
   <v-app style="box-sizing: border-box; background: #FFF3E0">
+    <head>
+      <title>{{pageTitle}}</title>
+    </head>
     <v-app-bar
       fixed
       app
@@ -17,6 +20,7 @@
     </v-app-bar>
     <v-main>
       <v-container>
+        
         <message />
         <Nuxt />
         <cprogress />
@@ -32,56 +36,69 @@
   </v-app>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, reactive, useMeta, useStore, useRouter, ref, computed, onUpdated, SetupContext } from '@nuxtjs/composition-api'
 import { Auth } from 'aws-amplify'
-import message from '../components/message.vue'
-import { mapActions } from 'vuex';
-export default {
-  data: () => (
-    {
-      userInfo: {},
-      fixed: true,
-      title: "default",
-      name: ""
-    }
-  ),
 
-  created(){
+export default defineComponent({
+  setup(){
     console.log("default created.")
-    this.$nuxt.$on('updateHeader', this.setHeader)
-    this.userInfo = this.$store.getters['userInfo/userInfo']
-    this.name = ("name" in this.userInfo && this.userInfo.name != undefined) ? this.userInfo.name : this.userInfo.username
-    console.log("name" in this.userInfo, this.name)
-
-  },
-  computed:{
-    pageTitle(){
-      return this.$store.getters['title/title']
-    }
-  },
-  methods: {
-    async signout(){
+    const store = useStore()
+    const router = useRouter()
+    //const {title} = useMeta()
+    const userInfo = reactive(store.getters['userInfo/userInfo'])
+    const fixed = ref(true)
+    const name = ref(("name" in userInfo && userInfo.name != undefined) ? userInfo.name : userInfo.username)
+    const home = ref("")
+    //title.value = store.getters['title/title']
+    console.log("name" in userInfo, name)
+    const pageTitle = computed(() => {
+      console.log("computed.pageTitle")
+      return store.getters['title/title']
+    })
+    const signout = async () => {
       try {
         await Auth.signOut();
-        this.$store.commit('userInfo/remove') 
-        this.$router.push("/signin")
+        store.commit('userInfo/remove') 
+        router.push("/signin")
       } catch (error) {
         console.log(error);
       }
-    },
-    gotoHome(){
-      this.$router.push(this.userInfo.home)
-    },
-    setHader(title){
-      this.title = title
-    },
-    ...mapActions({
-      clearMessage: "message/clear"
-    }),
-  },
-  updated(){
-    console.log("default.updated")
-    this.clearMessage()
+    }
+    const goHome = () => {
+      let tmpHome:string = ""
+      if(home != undefined && home.value != ""){
+        tmpHome = home.value
+      }else{
+        tmpHome = store.getters['userInfo/userInfo'].home
+      }
+      router.push(tmpHome)
+    }
+    //const setHeader = (value:string) => {
+    //  title.value = value
+    //}
+    const clearMessage = () =>{
+      store.commit("message/clear")
+    }
+    
+    onUpdated(() =>{
+      console.log("default.updated")
+      clearMessage()
+    })
+
+    return {
+      userInfo,
+      fixed,
+      //title,
+      name,
+      //setHeader,
+      clearMessage,
+      pageTitle,
+      signout,
+      goHome,
+    };
+
+
   }
-}
+})
 </script>

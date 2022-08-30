@@ -32,14 +32,13 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    { src: '~/plugins/globalMixins.js', ssr: false },
-    { src: '~/plugins/amplify.js', ssr: false },
-    { src: '~/plugins/authUtilitys.js', ssr: false },
-    { src: '~/plugins/questionsUtilitys.js', ssr: false },
-    { src: '~/plugins/userResultUtilitys.js', ssr: false },
-    { src: '~/plugins/executer.js', ssr: false },
+    //{ src: '~/plugins/globalMixins.js', ssr: false },
+    '@/plugins/amplify',
+    '@/plugins/questionsUtilitys',
+    '@/plugins/userResultUtilitys',
+    '@/plugins/executer',
+    '@/plugins/authUtilitys',
   ],
-
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
 
@@ -47,6 +46,9 @@ export default {
   buildModules: [
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
+    '@nuxt/typescript-build',
+    '@nuxtjs/composition-api/module',
+    'nuxt-typed-vuex',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
