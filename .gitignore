@@ -112,3 +112,4 @@ amplifytools.xcconfig
 .secret-*
 #amplify-do-not-edit-end
 .vscode/
+.output/

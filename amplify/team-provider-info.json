@@ -14,7 +14,8 @@
     },
     "categories": {
       "auth": {
-        "sk2sec91b34d93": {}
+        "sk2sec91b34d93": {},
+        "userPoolGroups": {}
       },
       "function": {
         "AdminQueriesbd07e157": {
@@ -31,6 +32,10 @@
           "appId": "dyj9a9u2n3e2d",
           "type": "manual"
         }
+      },
+      "api": {
+        "AdminQueries": {},
+        "sk2secDynamoDBAPI": {}
       }
     }
   }
