@@ -34,13 +34,15 @@ export default {
     
   }),
   async created() {
+    let authFlag = true
     this.unsubscribeAuth = onAuthUIStateChange((authState, authData) => {
       this.authState = authState;
       this.user = authData;
 
       console.log(authState, authData)
 
-      if (authState === AuthState.SignedIn && authData) {
+      if (authFlag && authState === AuthState.SignedIn && authData) {
+        authFlag = false
         console.log("signin!!!!!!")
         // CognitoUserからJWTトークンを取得
         const jwt = authData.signInUserSession.accessToken.jwtToken
